@@ -1,16 +1,18 @@
+use crate::v8::json::stringify;
 use crate::Context;
 use camunda_client::models::LockedExternalTaskDto;
-use rusty_v8 as v8;
-use rusty_v8::{json, ContextScope, Integer};
-use serde_json::{json, Value};
+use serde_json::json;
+use serde_json::Value as JSONValue;
 use std::sync::Mutex;
-use v_api::app::ResultCode;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_onto::individual::Individual;
-use v_search::common::FTQuery;
+use v_module::v_api::app::ResultCode;
+use v_module::v_onto::individual::Individual;
+use v_module::v_search::common::FTQuery;
 use v_v8::callback::*;
 use v_v8::common::{v8obj_into_individual, ScriptInfo};
-use v_v8::scripts_workplace::{ScriptsWorkPlace};
+use v_v8::rusty_v8 as v8;
+use v_v8::rusty_v8::ContextScope;
+use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 
 lazy_static! {
@@ -35,7 +37,7 @@ impl Default for ScriptInfoContext {
 }
 
 pub enum OutValue {
-    Json(Value),
+    Json(JSONValue),
     Bool(bool),
     List(Vec<String>),
     Individual(Individual),
@@ -78,7 +80,7 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                     }
                 }
                 OutValue::Json(ov) => {
-                    if let Some(jo) = json::stringify(&mut local_scope, res) {
+                    if let Some(jo) = stringify(&mut local_scope, res) {
                         let js_str = jo.to_rust_string_lossy(&mut local_scope);
                         if let Ok(v) = serde_json::from_str(&js_str) {
                             *ov = v;
@@ -90,7 +92,7 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                     if let Some(obj) = res.to_object(&mut local_scope) {
                         if let Some(key_list) = obj.get_property_names(&mut local_scope) {
                             for resources_idx in 0..key_list.length() {
-                                let j_resources_idx = Integer::new(&mut local_scope, resources_idx as i32);
+                                let j_resources_idx = v8::Integer::new(&mut local_scope, resources_idx as i32);
                                 if let Some(v) = obj.get(&mut local_scope, j_resources_idx.into()) {
                                     if let Some(s) = v.to_string(&mut local_scope) {
                                         let ss = s.to_rust_string_lossy(&mut local_scope);

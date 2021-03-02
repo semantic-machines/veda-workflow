@@ -6,11 +6,11 @@ use crate::start_form::prepare_start_form;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use std::error::Error;
+use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
-use v_module::module::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError, get_info_of_module, wait_module, wait_load_ontology};
-use v_module::onto::load_onto;
-use v_onto::individual::Individual;
-use v_onto::onto::Onto;
+use v_module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::onto::Onto;
 use v_queue::consumer::Consumer;
 
 mod common;
@@ -72,20 +72,22 @@ fn listen_queue<'a>() -> Result<(), i32> {
         &mut ctx,
         &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
         &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> bool),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context)),
+        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) {}
+fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> {
+    Ok(())
+}
 
 fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> bool {
-    false
+fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(false)
 }
 
 fn prepare(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {

@@ -8,14 +8,15 @@ use crate::v8_script::{execute_external_js_task, load_external_task_scripts, Out
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use camunda_client::models::{FetchExternalTaskTopicDto, FetchExternalTasksDto};
-use serde_json::Value;
+use serde_json::Value as JSONValue;
 use std::{thread, time};
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{init_log, Module, get_info_of_module, wait_module, wait_load_ontology, get_storage_init_param};
-use v_module::onto::load_onto;
-use v_onto::onto::Onto;
-use v_storage::remote_indv_r_storage::inproc_storage_manager;
+use v_module::common::*;
+use v_module::module::{get_info_of_module, init_log, wait_load_ontology, wait_module, Module};
+use v_module::remote_indv_r_storage::inproc_storage_manager;
+use v_module::v_onto::onto::Onto;
 use v_v8::jsruntime::JsRuntime;
+use v_v8::rusty_v8 as v8;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 
 mod common;
@@ -36,7 +37,7 @@ fn main() -> Result<(), i32> {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    thread::spawn(move || inproc_storage_manager(get_storage_init_param()));
+    thread::spawn(move || inproc_storage_manager());
 
     let mut module = Module::default();
 
@@ -90,7 +91,7 @@ fn main() -> Result<(), i32> {
                                 for i_task in locked_tasks.iter() {
                                     let execution_id = i_task.id.as_deref().unwrap_or_default();
                                     let topic_id = i_task.topic_name.as_deref().unwrap_or_default();
-                                    let mut res = OutValue::Json(Value::default());
+                                    let mut res = OutValue::Json(JSONValue::default());
                                     if execute_external_js_task(i_task, topic_id, &mut ctx, &mut res) {
                                         let out_data = out_value_2_complete_external_task(worker_id, res);
                                         if let Err(e) = ctx.api_client.external_task_api().complete_external_task_resource(&execution_id, Some(out_data)) {

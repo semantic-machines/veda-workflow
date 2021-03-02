@@ -1,11 +1,11 @@
 use crate::Context;
 use std::error::Error;
 use std::fmt;
-use v_api::app::generate_unique_uri;
-use v_api::IndvOp;
 use v_module::module::Module;
-use v_onto::individual::Individual;
-use v_onto::onto::Onto;
+use v_module::v_api::app::generate_unique_uri;
+use v_module::v_api::IndvOp;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::onto::Onto;
 
 #[derive(Debug)]
 pub struct MyError(pub String);
