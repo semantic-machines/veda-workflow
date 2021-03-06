@@ -1,34 +1,24 @@
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate lazy_static;
 
 use crate::common::out_value_2_complete_external_task;
-use crate::v8_script::{execute_external_js_task, load_external_task_scripts, OutValue, ScriptInfoContext};
+use crate::v8_script::execute_external_js_task;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use camunda_client::models::{FetchExternalTaskTopicDto, FetchExternalTasksDto};
 use serde_json::Value as JSONValue;
 use std::{thread, time};
+use v_camunda_common::scripts::{load_task_scripts, Context, OutValue};
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::common::*;
 use v_module::module::{get_info_of_module, init_log, wait_load_ontology, wait_module, Module};
 use v_module::remote_indv_r_storage::inproc_storage_manager;
 use v_module::v_onto::onto::Onto;
 use v_v8::jsruntime::JsRuntime;
-use v_v8::rusty_v8 as v8;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 
 mod common;
 mod v8_script;
-
-pub struct Context<'a> {
-    sys_ticket: String,
-    //onto: Onto,
-    xr: XapianReader,
-    workplace: ScriptsWorkPlace<'a, ScriptInfoContext>,
-    pub api_client: APIClient,
-}
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-EXTERNAL-TASK");
@@ -71,7 +61,7 @@ fn main() -> Result<(), i32> {
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
-        load_external_task_scripts(&mut ctx.workplace, &mut ctx.xr);
+        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler");
 
         let worker_id = "camunda-external-task";
 
@@ -99,7 +89,9 @@ fn main() -> Result<(), i32> {
                                         }
                                     } else {
                                         warn!("topic {} not found", topic_id);
-                                        ctx.api_client.external_task_api().unlock(&execution_id);
+                                        if let Err(e) = ctx.api_client.external_task_api().unlock(&execution_id) {
+                                            error!("filed to unlock task, execution_id={}, err={:?}", execution_id, e);
+                                        }
                                     }
                                 }
                             }

@@ -3,6 +3,17 @@ BUILD_PATH=$PWD
 mkdir ./bin
 VEDA_BIN=$BUILD_PATH/bin
 
+if [ $1 == "camunda-user-task" ] || [ $1 == "veda-camunda-user-task" ] || [ -z $1 ]; then
+    echo BUILD veda-camunda-user-task
+    rm ./veda-camunda-user-task
+
+    cd veda-camunda-user-task
+    cargo build --release
+    cd $BUILD_PATH
+    cp $CARGO_TARGET_DIR/release/veda-camunda-user-task $VEDA_BIN
+
+fi
+
 if [ $1 == "camunda-external-task" ] || [ $1 == "veda-camunda-external-task" ] || [ -z $1 ]; then
     echo BUILD veda-camunda-external-task
     rm ./veda-camunda-external-task

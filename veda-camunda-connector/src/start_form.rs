@@ -3,7 +3,7 @@ use crate::Context;
 use serde_json::json;
 
 //use camunda_client::apis::Error as CamundaError;
-use camunda_client::models::{ProcessInstanceWithVariablesDto, StartProcessInstanceDto, VariableValueDto};
+use camunda_client::models::{StartProcessInstanceDto, VariableValueDto};
 use std::collections::HashMap;
 use std::error::Error;
 use v_module::module::Module;

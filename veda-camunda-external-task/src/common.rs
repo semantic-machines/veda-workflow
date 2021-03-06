@@ -1,6 +1,6 @@
-use crate::v8_script::OutValue;
 use camunda_client::models::{CompleteExternalTaskDto, VariableValueDto};
 use std::collections::HashMap;
+use v_camunda_common::scripts::OutValue;
 
 pub fn out_value_2_complete_external_task(worker_id: &str, res: OutValue) -> CompleteExternalTaskDto {
     let mut out_data = CompleteExternalTaskDto::new();

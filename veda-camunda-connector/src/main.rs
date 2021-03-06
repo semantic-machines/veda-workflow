@@ -68,17 +68,16 @@ fn listen_queue<'a>() -> Result<(), i32> {
 
     module.listen_queue(
         &mut queue_consumer,
-        &mut module_info.unwrap(),
         &mut ctx,
         &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
+        &mut (prepare as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
 }
 
@@ -86,12 +85,12 @@ fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> O
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok(false)
 }
 
-fn prepare(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
-    match prepare_and_err(module, _module_info, ctx, queue_element, _my_consumer) {
+fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+    match prepare_and_err(module, ctx, queue_element, _my_consumer) {
         Ok(r) => Ok(r),
         Err(e) => {
             error!("prepare err={:?}", e);
@@ -102,7 +101,6 @@ fn prepare(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context
 
 fn prepare_and_err(
     module: &mut Module,
-    _module_info: &mut ModuleInfo,
     ctx: &mut Context,
     queue_element: &mut Individual,
     _my_consumer: &Consumer,
