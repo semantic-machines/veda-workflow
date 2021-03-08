@@ -57,7 +57,8 @@ fn main() -> Result<(), i32> {
             //onto,
             sys_ticket,
             xr,
-            api_client: APIClient::new(Configuration::default()),
+            camunda_client: APIClient::new(Configuration::default()),
+            veda_client: ()
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 

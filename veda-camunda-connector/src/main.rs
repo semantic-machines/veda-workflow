@@ -23,7 +23,7 @@ pub struct Context {
 }
 
 fn main() -> Result<(), i32> {
-    init_log("VEDA-CAMUNDA-CONNECTOR");
+    init_log("CAMUNDA-CONNECTOR");
 
     if get_info_of_module("fulltext_indexer").unwrap_or((0, 0)).0 == 0 {
         wait_module("fulltext_indexer", wait_load_ontology());

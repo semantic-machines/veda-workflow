@@ -38,6 +38,7 @@ pub trait TaskApi {
     fn get_deployed_form(&self, id: &str) -> Result<std::path::PathBuf, Error>;
     fn get_form(&self, id: &str) -> Result<crate::models::FormDto, Error>;
     fn get_form_variables(&self, id: &str, variable_names: Option<&str>, deserialize_values: Option<bool>) -> Result<::std::collections::HashMap<String, crate::models::VariableValueDto>, Error>;
+    fn get_variables(&self, id: &str, variable_names: Option<&str>, deserialize_values: Option<bool>) -> Result<::std::collections::HashMap<String, crate::models::VariableValueDto>, Error>;
     fn get_rendered_form(&self, id: &str) -> Result<std::path::PathBuf, Error>;
     fn get_task(&self, id: &str) -> Result<crate::models::TaskDto, Error>;
     fn get_tasks(&self, process_instance_id: Option<&str>, process_instance_id_in: Option<&str>, process_instance_business_key: Option<&str>, process_instance_business_key_expression: Option<&str>, process_instance_business_key_in: Option<&str>, process_instance_business_key_like: Option<&str>, process_instance_business_key_like_expression: Option<&str>, process_definition_id: Option<&str>, process_definition_key: Option<&str>, process_definition_key_in: Option<&str>, process_definition_name: Option<&str>, process_definition_name_like: Option<&str>, execution_id: Option<&str>, case_instance_id: Option<&str>, case_instance_business_key: Option<&str>, case_instance_business_key_like: Option<&str>, case_definition_id: Option<&str>, case_definition_key: Option<&str>, case_definition_name: Option<&str>, case_definition_name_like: Option<&str>, case_execution_id: Option<&str>, activity_instance_id_in: Option<&str>, tenant_id_in: Option<&str>, without_tenant_id: Option<bool>, assignee: Option<&str>, assignee_expression: Option<&str>, assignee_like: Option<&str>, assignee_like_expression: Option<&str>, assignee_in: Option<&str>, owner: Option<&str>, owner_expression: Option<&str>, candidate_group: Option<&str>, candidate_group_expression: Option<&str>, candidate_user: Option<&str>, candidate_user_expression: Option<&str>, include_assigned_tasks: Option<bool>, involved_user: Option<&str>, involved_user_expression: Option<&str>, assigned: Option<bool>, unassigned: Option<bool>, task_definition_key: Option<&str>, task_definition_key_in: Option<&str>, task_definition_key_like: Option<&str>, name: Option<&str>, name_not_equal: Option<&str>, name_like: Option<&str>, name_not_like: Option<&str>, description: Option<&str>, description_like: Option<&str>, priority: Option<i32>, max_priority: Option<i32>, min_priority: Option<i32>, due_date: Option<&str>, due_date_expression: Option<&str>, due_after: Option<&str>, due_after_expression: Option<&str>, due_before: Option<&str>, due_before_expression: Option<&str>, follow_up_date: Option<&str>, follow_up_date_expression: Option<&str>, follow_up_after: Option<&str>, follow_up_after_expression: Option<&str>, follow_up_before: Option<&str>, follow_up_before_expression: Option<&str>, follow_up_before_or_not_existent: Option<&str>, follow_up_before_or_not_existent_expression: Option<&str>, created_on: Option<&str>, created_on_expression: Option<&str>, created_after: Option<&str>, created_after_expression: Option<&str>, created_before: Option<&str>, created_before_expression: Option<&str>, delegation_state: Option<&str>, candidate_groups: Option<&str>, candidate_groups_expression: Option<&str>, with_candidate_groups: Option<bool>, without_candidate_groups: Option<bool>, with_candidate_users: Option<bool>, without_candidate_users: Option<bool>, active: Option<bool>, suspended: Option<bool>, task_variables: Option<&str>, process_variables: Option<&str>, case_instance_variables: Option<&str>, variable_names_ignore_case: Option<bool>, variable_values_ignore_case: Option<bool>, parent_task_id: Option<&str>, sort_by: Option<&str>, sort_order: Option<&str>, first_result: Option<i32>, max_results: Option<i32>) -> Result<Vec<crate::models::TaskDto>, Error>;
@@ -171,6 +172,29 @@ impl TaskApi for TaskApiClient {
         let uri_str = format!("{}/task/{id}/form", configuration.base_path, id=crate::apis::urlencode(id));
         let mut req_builder = client.get(uri_str.as_str());
 
+        if let Some(ref user_agent) = configuration.user_agent {
+            req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+        }
+
+        // send request
+        let req = req_builder.build()?;
+
+        Ok(client.execute(req)?.error_for_status()?.json()?)
+    }
+
+    fn get_variables(&self, id: &str, variable_names: Option<&str>, deserialize_values: Option<bool>) -> Result<::std::collections::HashMap<String, crate::models::VariableValueDto>, Error> {
+        let configuration: &configuration::Configuration = self.configuration.borrow();
+        let client = &configuration.client;
+
+        let uri_str = format!("{}/task/{id}/variables", configuration.base_path, id=crate::apis::urlencode(id));
+        let mut req_builder = client.get(uri_str.as_str());
+
+        if let Some(ref s) = variable_names {
+            req_builder = req_builder.query(&[("variableNames", &s.to_string())]);
+        }
+        if let Some(ref s) = deserialize_values {
+            req_builder = req_builder.query(&[("deserializeValues", &s.to_string())]);
+        }
         if let Some(ref user_agent) = configuration.user_agent {
             req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
         }

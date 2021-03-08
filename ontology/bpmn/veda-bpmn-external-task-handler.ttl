@@ -67,3 +67,21 @@ return task.variables;
 
   """ ;
 .
+
+bpmn:UserTaskHandler1
+  rdf:type bpmn:UserTaskHandler ;
+  rdfs:label "Тестовый обработчик UserTask" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * task = camunda task JSON
+ */
+
+console.log( JSON.stringify(task, null, 2) );
+
+task.variables["resultVariable"] = {value: "resultVariable", type: "String"};
+
+return task.variables;
+
+  """ ;
+.
