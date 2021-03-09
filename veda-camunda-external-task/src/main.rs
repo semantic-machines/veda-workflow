@@ -13,6 +13,7 @@ use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::common::*;
 use v_module::module::{get_info_of_module, init_log, wait_load_ontology, wait_module, Module};
 use v_module::remote_indv_r_storage::inproc_storage_manager;
+use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::onto::Onto;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
@@ -58,16 +59,17 @@ fn main() -> Result<(), i32> {
             sys_ticket,
             xr,
             camunda_client: APIClient::new(Configuration::default()),
-            veda_client: ()
+            veda_client: VedaClient::new(Module::get_property("main_module_url").unwrap_or_default()),
+            count_exec: 0,
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler");
+        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler", &["ticket", "task"]);
 
         let worker_id = "camunda-external-task";
 
         loop {
-            match ctx.api_client.external_task_api().get_external_tasks(
+            match ctx.camunda_client.external_task_api().get_external_tasks(
                 None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
             ) {
                 Ok(res) => {
@@ -77,7 +79,7 @@ fn main() -> Result<(), i32> {
                         }
                         let mut fetch_task_arg = FetchExternalTasksDto::new(worker_id.to_owned(), Some(1));
                         fetch_task_arg.topics = Some(vec![FetchExternalTaskTopicDto::new(task.topic_name.unwrap_or_default(), Some(60 * 60 * 1000))]);
-                        match ctx.api_client.external_task_api().fetch_and_lock(Some(fetch_task_arg)) {
+                        match ctx.camunda_client.external_task_api().fetch_and_lock(Some(fetch_task_arg)) {
                             Ok(locked_tasks) => {
                                 for i_task in locked_tasks.iter() {
                                     let execution_id = i_task.id.as_deref().unwrap_or_default();
@@ -85,12 +87,12 @@ fn main() -> Result<(), i32> {
                                     let mut res = OutValue::Json(JSONValue::default());
                                     if execute_external_js_task(i_task, topic_id, &mut ctx, &mut res) {
                                         let out_data = out_value_2_complete_external_task(worker_id, res);
-                                        if let Err(e) = ctx.api_client.external_task_api().complete_external_task_resource(&execution_id, Some(out_data)) {
+                                        if let Err(e) = ctx.camunda_client.external_task_api().complete_external_task_resource(&execution_id, Some(out_data)) {
                                             error!("complete_external_task_resource, error={:?}", e);
                                         }
                                     } else {
                                         warn!("topic {} not found", topic_id);
-                                        if let Err(e) = ctx.api_client.external_task_api().unlock(&execution_id) {
+                                        if let Err(e) = ctx.camunda_client.external_task_api().unlock(&execution_id) {
                                             error!("filed to unlock task, execution_id={}, err={:?}", execution_id, e);
                                         }
                                     }

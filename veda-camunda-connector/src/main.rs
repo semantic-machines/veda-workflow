@@ -99,12 +99,7 @@ fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individua
     }
 }
 
-fn prepare_and_err(
-    module: &mut Module,
-    ctx: &mut Context,
-    queue_element: &mut Individual,
-    _my_consumer: &Consumer,
-) -> Result<bool, Box<dyn Error>> {
+fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, Box<dyn Error>> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("cmd is none");

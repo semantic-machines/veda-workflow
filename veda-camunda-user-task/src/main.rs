@@ -65,7 +65,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:UserTaskHandler");
+        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:UserTaskHandler", &["ticket", "task", "variables", "form_variables"]);
 
         module.listen_queue_raw(
             &mut queue_consumer,

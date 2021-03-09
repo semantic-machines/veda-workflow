@@ -77,11 +77,11 @@ bpmn:UserTaskHandler1
  * task = camunda task JSON
  */
 
-console.log( JSON.stringify(task, null, 2) );
+print( JSON.stringify(task, null, 2) );
 
-task.variables["resultVariable"] = {value: "resultVariable", type: "String"};
+print( JSON.stringify(variables, null, 2) );
 
-return task.variables;
+print( JSON.stringify(form_variables, null, 2) );
 
   """ ;
 .
