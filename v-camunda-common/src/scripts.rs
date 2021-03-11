@@ -98,7 +98,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
             + &set_variables (js_vars)
             + &script_text
             + " \
-         } catch (e) { log_trace (e); } \
+         } catch (e) { log_trace (e.stack); } \
       })();";
 
         let id = if let Some (v) = ev_indv.get_first_literal("bpmn:triggerByTopic") {
