@@ -198,7 +198,7 @@ pub fn execute_user_js_task(task: Option<String>, vars: Option<String>, form_var
 
                 drop(sh_tnx);
 
-                info!("{} end: {}", ctx.count_exec, script_id);
+                info!("{}, {}", ctx.count_exec, script_id);
 
                 if res != ResultCode::Ok {
                     info!("fail exec event script : {}, result={:?}", script_id, res);
