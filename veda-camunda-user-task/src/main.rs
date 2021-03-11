@@ -120,7 +120,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                 }
             };
 
-            let vars = match ctx.camunda_client.task_api().get_variables(&task_id, None, None) {
+            let vars = match ctx.camunda_client.task_api().get_variables(&task_id, None, Some (false)) {
                 Ok(res) => Some(json!(res).to_string()),
                 Err(e) => {
                     error!("failed to read variables {:?}", e);
@@ -128,7 +128,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                 }
             };
 
-            let form_vars = match ctx.camunda_client.task_api().get_form_variables(&task_id, None, None) {
+            let form_vars = match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some (false)) {
                 Ok(res) => Some(json!(res).to_string()),
                 Err(e) => {
                     error!("failed to read form variables {:?}", e);
