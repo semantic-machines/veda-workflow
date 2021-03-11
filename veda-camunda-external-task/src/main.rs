@@ -91,7 +91,7 @@ fn main() -> Result<(), i32> {
                                             error!("complete_external_task_resource, error={:?}", e);
                                         }
                                     } else {
-                                        warn!("topic {} not found", topic_id);
+                                        warn!("fail to execute script {}", topic_id);
                                         if let Err(e) = ctx.camunda_client.external_task_api().unlock(&execution_id) {
                                             error!("filed to unlock task, execution_id={}, err={:?}", execution_id, e);
                                         }
