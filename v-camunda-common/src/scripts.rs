@@ -14,12 +14,15 @@ use v_v8::rusty_v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 use v_module::v_api::APIClient as VedaClient;
+use v_v8::common::HashVec;
 
-pub struct ScriptInfoContext {}
+pub struct ScriptInfoContext {
+    pub trigger_by_event: HashVec<String>
+}
 
 impl Default for ScriptInfoContext {
     fn default() -> Self {
-        Self {}
+        Self { trigger_by_event: Default::default() }
     }
 }
 
@@ -108,10 +111,12 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         };
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(&id, &str_script);
+        scr_inf.context.trigger_by_event = HashVec::new(ev_indv.get_literals("bpmn:triggerByEvent").unwrap_or_default());
 
         wp.add_to_order(&scr_inf);
 
         let scope = &mut v8::ContextScope::new(&mut wp.scope, wp.context);
+        
         scr_inf.compile_script(ev_indv.get_id(), scope);
         wp.scripts.insert(scr_inf.id.to_string(), scr_inf);
     } else {
@@ -180,6 +185,8 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                 }
                 _ => {}
             }
+        } else {
+            return true;
         }
     }
 

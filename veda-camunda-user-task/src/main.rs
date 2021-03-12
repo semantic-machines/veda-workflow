@@ -136,7 +136,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                 }
             };
 
-            match execute_user_js_task(task, vars, form_vars, ctx) {
+            match execute_user_js_task(&event.unwrap(), task, vars, form_vars, ctx) {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(e);
@@ -150,7 +150,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
     Ok(true)
 }
 
-pub fn execute_user_js_task(task: Option<String>, vars: Option<String>, form_vars: Option<String>, ctx: &mut Context) -> Result<i64, PrepareError> {
+pub fn execute_user_js_task(event: &str, task: Option<String>, vars: Option<String>, form_vars: Option<String>, ctx: &mut Context) -> Result<i64, PrepareError> {
     let mut session_data = CallbackSharedData::default();
     session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
     if let Some(v) = task {
@@ -175,6 +175,9 @@ pub fn execute_user_js_task(task: Option<String>, vars: Option<String>, form_var
 
     for script_id in ctx.workplace.scripts_order.iter() {
         if let Some(script) = ctx.workplace.scripts.get(script_id) {
+            if !script.context.trigger_by_event.hash.contains(event) {
+                continue;
+            }
             if let Some(compiled_script) = script.compiled_script {
                 let mut sh_tnx = G_TRANSACTION.lock().unwrap();
                 let tnx = sh_tnx.get_mut();
