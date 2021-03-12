@@ -47,6 +47,18 @@ pub(crate) fn is_start_form(rdf_types: &[String], onto: &mut Onto) -> bool {
     false
 }
 
+pub(crate) fn is_decision_form(rdf_types: &[String], onto: &mut Onto) -> bool {
+    for itype in rdf_types {
+        if itype == "bpmn:DecisionForm" {
+            return true;
+        }
+        if onto.is_some_entered(&itype, &["bpmn:DecisionForm"]) {
+            return true;
+        }
+    }
+    false
+}
+
 pub fn get_individual(module: &mut Module, uri: &str) -> Result<Individual, Box<dyn Error>> {
     let mut indv = Individual::default();
     if uri.is_empty() || !module.storage.get_individual(uri, &mut indv) {

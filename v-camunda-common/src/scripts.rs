@@ -4,25 +4,27 @@ use std::sync::Mutex;
 use v8::json::stringify;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::v_api::app::ResultCode;
+use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::individual::Individual;
 use v_module::v_search::common::FTQuery;
 use v_v8::callback::*;
 use v_v8::common::v8obj_into_individual;
+use v_v8::common::HashVec;
 use v_v8::common::ScriptInfo;
 use v_v8::rusty_v8 as v8;
 use v_v8::rusty_v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
-use v_module::v_api::APIClient as VedaClient;
-use v_v8::common::HashVec;
 
 pub struct ScriptInfoContext {
-    pub trigger_by_event: HashVec<String>
+    pub trigger_by_event: HashVec<String>,
 }
 
 impl Default for ScriptInfoContext {
     fn default() -> Self {
-        Self { trigger_by_event: Default::default() }
+        Self {
+            trigger_by_event: Default::default(),
+        }
     }
 }
 
@@ -70,7 +72,7 @@ pub fn load_task_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut 
     info!("load scripts from db: {:?}", wp.scripts_order);
 }
 
-fn set_variables (js_vars: &[&str]) -> String {
+fn set_variables(js_vars: &[&str]) -> String {
     let mut out_str = String::new();
 
     for el in js_vars {
@@ -98,13 +100,13 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         try { \
           "
         .to_owned()
-            + &set_variables (js_vars)
+            + &set_variables(js_vars)
             + &script_text
             + " \
          } catch (e) { log_trace (e.stack); } \
       })();";
 
-        let id = if let Some (v) = ev_indv.get_first_literal("bpmn:triggerByTopic") {
+        let id = if let Some(v) = ev_indv.get_first_literal("bpmn:triggerByTopic") {
             v
         } else {
             ev_indv.get_id().to_owned()
@@ -116,7 +118,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         wp.add_to_order(&scr_inf);
 
         let scope = &mut v8::ContextScope::new(&mut wp.scope, wp.context);
-        
+
         scr_inf.compile_script(ev_indv.get_id(), scope);
         wp.scripts.insert(scr_inf.id.to_string(), scr_inf);
     } else {

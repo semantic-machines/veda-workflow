@@ -1,7 +1,8 @@
 #[macro_use]
 extern crate log;
 
-use crate::common::is_start_form;
+use crate::common::{is_decision_form, is_start_form};
+use crate::decision_form::prepare_decision_form;
 use crate::start_form::prepare_start_form;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
@@ -14,12 +15,13 @@ use v_module::v_onto::onto::Onto;
 use v_queue::consumer::Consumer;
 
 mod common;
+mod decision_form;
 mod start_form;
 
 pub struct Context {
     sys_ticket: String,
     onto: Onto,
-    pub api_client: APIClient,
+    pub camunda_client: APIClient,
 }
 
 fn main() -> Result<(), i32> {
@@ -63,7 +65,7 @@ fn listen_queue<'a>() -> Result<(), i32> {
     let mut ctx = Context {
         sys_ticket: systicket,
         onto,
-        api_client: APIClient::new(configuration),
+        camunda_client: APIClient::new(configuration),
     };
 
     module.listen_queue(
@@ -114,6 +116,11 @@ fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut I
 
     if is_start_form(&rdf_types, &mut ctx.onto) && signal == "?" {
         prepare_start_form(&mut new_state, ctx, module, &signal)?;
+        return Ok(true);
+    }
+
+    if is_decision_form(&rdf_types, &mut ctx.onto) && signal == "?" {
+        prepare_decision_form(&mut new_state, ctx, module, &signal)?;
         return Ok(true);
     }
 

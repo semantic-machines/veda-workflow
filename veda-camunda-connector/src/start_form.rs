@@ -2,7 +2,6 @@ use crate::common::get_individual;
 use crate::Context;
 use serde_json::json;
 
-//use camunda_client::apis::Error as CamundaError;
 use camunda_client::models::{StartProcessInstanceDto, VariableValueDto};
 use std::collections::HashMap;
 use std::error::Error;
@@ -10,12 +9,11 @@ use v_module::module::Module;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::{DataType, Lang};
 use v_module::v_onto::individual::Individual;
-//use v_module::v_onto::parser::RawType::JSON;
 
 pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module: &mut Module, _signal: &str) -> Result<(), Box<dyn Error>> {
     if start_form.any_exists("bpmn:hasStatus", &["bpmn:ToBeStarted"]) {
         if let Some(process_id) = start_form.get_first_literal("bpmn:startProcessId") {
-            let start_form_id = start_form.get_id().to_owned();
+            //let start_form_id = start_form.get_id().to_owned();
             start_form.parse_all();
             start_form.remove("bpmn:startProcess");
             start_form.remove("rdfs:label");
@@ -45,7 +43,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
             }
 
             params.variables = Some(vars);
-            match ctx.api_client.process_definition_api().start_process_instance_by_key(&process_id, Some(params)) {
+            match ctx.camunda_client.process_definition_api().start_process_instance_by_key(&process_id, Some(params)) {
                 Ok(res) => {
                     info!("res={:?}", res);
 
