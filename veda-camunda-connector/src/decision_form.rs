@@ -22,6 +22,7 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
             match ctx.camunda_client.task_api().complete(&task_id, Some(params)) {
                 Ok(_) => {
                     decision_form.parse_all();
+                    decision_form.set_bool("v-wf:isCompleted", true);
                     module.api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &decision_form)?;
                 }
                 Err(e) => {
