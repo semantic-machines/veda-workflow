@@ -1,0 +1,48 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+<http://semantic-machines.com/veda/veda-bpmn-start-form>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:StartForm
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Стартовая форма"@ru ;
+  rdfs:label "Start form"@en ;
+.
+bpmn:startProcessId
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Запустить процесс"@ru ;
+  rdfs:label "Start process"@en ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:range xsd:string ;
+.
+bpmn:startedProcessInstanceId
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Запустить процесс"@ru ;
+  rdfs:label "Start process"@en ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:range bpmn:ProcessInstance ;
+.
+bpmn:hasStatus
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Статус"@ru ;
+  rdfs:label "Status"@en ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:range bpmn:Status ;
+.

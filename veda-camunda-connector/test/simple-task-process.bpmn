@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0x1ppnw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="SimpleTaskProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0jakouw</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0jakouw" sourceRef="StartEvent_1" targetRef="Activity_1xa2wht" />
+    <bpmn:serviceTask id="Activity_1xa2wht" name="Установить права на документ" camunda:type="external" camunda:topic="setRights">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="subject">${ startForm.jsonPath("$.v-s:responsible[0].data").stringValue() }</camunda:inputParameter>
+          <camunda:inputParameter name="object">${ startForm.jsonPath("$.v-wf:onDocument[0].data").stringValue() }</camunda:inputParameter>
+          <camunda:inputParameter name="permission">r</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jakouw</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yjwjdz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1yjwjdz" sourceRef="Activity_1xa2wht" targetRef="Activity_1sypuux" />
+    <bpmn:serviceTask id="Activity_1sypuux" name="Установить статус документа - Исполнение" camunda:type="external" camunda:topic="setProperty">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="property">v-s:hasStatus</camunda:inputParameter>
+          <camunda:inputParameter name="object">${ startForm.jsonPath("$.v-wf:onDocument[0].data").stringValue() }</camunda:inputParameter>
+          <camunda:inputParameter name="value">v-s:StatusExecution</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1yjwjdz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0663m9t</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0663m9t" sourceRef="Activity_1sypuux" targetRef="Activity_19xleoo" />
+    <bpmn:userTask id="Activity_19xleoo" name="Исполнить задачу" camunda:assignee="${ startForm.jsonPath(&#34;$.v-s:responsible[0].data&#34;).stringValue() }">
+      <bpmn:incoming>Flow_0663m9t</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ebod3m</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1ebod3m" sourceRef="Activity_19xleoo" targetRef="Activity_0rcuowe" />
+    <bpmn:userTask id="Activity_0rcuowe" name="Ознакомиться с результатом" camunda:assignee="${ startForm.jsonPath(&#34;$.v-s:creator[0].data&#34;).stringValue() }">
+      <bpmn:incoming>Flow_1ebod3m</bpmn:incoming>
+      <bpmn:outgoing>Flow_1nc09w0</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_0st4taf">
+      <bpmn:incoming>Flow_1nc09w0</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1nc09w0" sourceRef="Activity_0rcuowe" targetRef="Event_0st4taf" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SimpleTaskProcess">
+      <bpmndi:BPMNEdge id="Flow_0jakouw_di" bpmnElement="Flow_0jakouw">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yjwjdz_di" bpmnElement="Flow_1yjwjdz">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0663m9t_di" bpmnElement="Flow_0663m9t">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="590" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ebod3m_di" bpmnElement="Flow_1ebod3m">
+        <di:waypoint x="690" y="117" />
+        <di:waypoint x="750" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nc09w0_di" bpmnElement="Flow_1nc09w0">
+        <di:waypoint x="850" y="117" />
+        <di:waypoint x="912" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0jkz7n4_di" bpmnElement="Activity_1xa2wht">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_176vt3t_di" bpmnElement="Activity_1sypuux">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pt3n79_di" bpmnElement="Activity_19xleoo">
+        <dc:Bounds x="590" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1thkpfs_di" bpmnElement="Activity_0rcuowe">
+        <dc:Bounds x="750" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0st4taf_di" bpmnElement="Event_0st4taf">
+        <dc:Bounds x="912" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

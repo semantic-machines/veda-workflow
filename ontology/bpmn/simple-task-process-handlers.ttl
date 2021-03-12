@@ -1,0 +1,110 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+<http://semantic-machines.com/veda/simple-task-process-handlers>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:SetPropertyHandler
+  rdf:type bpmn:ExternalTaskHandler ;
+  rdfs:label "Обработчик топика 'setProperty'" ;
+  bpmn:triggerByTopic "setProperty" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * task = camunda task JSON
+ */
+
+console.log('SET PROPERTY');
+
+const object = task.variables.object.value;
+const property = task.variables.property.value;
+const value = task.variables.value.value;
+
+console.log(object, property, value);
+
+const individual = new veda.IndividualModel(object);
+individual.set(property, value);
+individual.save();
+
+return {
+  setProperty: {
+    value: 'success',
+    type: 'String',
+  },
+};
+  """ ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:SetRightsHandler
+  rdf:type bpmn:ExternalTaskHandler ;
+  rdfs:label "Обработчик топика 'setRights'" ;
+  bpmn:triggerByTopic "setRights" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * task = camunda task JSON
+ */
+
+console.log('SET RIGHTS');
+
+const subject = task.variables.subject.value;
+const object = task.variables.object.value;
+let permission = task.variables.permission.value;
+
+permission = permission.split('').map(char => {
+  return char === 'c' ? 'v-s:canCreate' :
+         char === 'r' ? 'v-s:canRead' :
+         char === 'u' ? 'v-s:canUpdate' :
+         char === 'd' ? 'v-s:canDelete' :
+         undefined;
+}).filter(Boolean);
+
+console.log(subject, object, permission);
+veda.Util.addRight(ticket, subject, object, permission);
+
+return {
+  setRights: {
+    value: 'success',
+    type: 'String',
+  },
+};
+  """ ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:AssignmentHandler
+  rdf:type bpmn:UserTaskHandler ;
+  rdfs:label "Обработчик события 'assignment'" ;
+  bpmn:triggerByEvent "assignment" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * task = camunda task JSON
+ * variables = camunda task variables
+ * form_variables = camunda form variables
+ */
+
+console.log('CREATE TASK');
+
+  """ ;
+.

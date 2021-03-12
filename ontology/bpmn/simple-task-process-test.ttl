@@ -11,7 +11,7 @@
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
 @prefix td: <http://semantic-machines.com/veda/test-data/> .
 
-<http://semantic-machines.com/veda/test-process>
+<http://semantic-machines.com/veda/simple-task-process>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda"@ru ;
   rdfs:label "Veda system ontology"@en ;
@@ -19,25 +19,23 @@
   v-s:loadPriority 6 ;
 .
 
-############# Test data
+# ------------------------------------------------------------
 
-td:test-process-start-form1
-  a bpmn:StartForm ;
-  bpmn:startProcessId "TestProcess" ;
+
+td:simple-task-process-start-form1
+  rdf:type bpmn:StartForm ;
+  bpmn:startProcessId "SimpleTaskProcess" ;
   bpmn:hasStatus bpmn:ToBeStarted ;
-  v-wf:onDocument td:AleksandraKhvostikova ;
-  s-wf:ComplexRouteStartForm_coordination1 td:test-process-start-form1-subform1 ;
-  rdfs:label "Тест стартовой формы комплексного процесса"@ru ;
+  v-s:creator td:RomanKarpov-Analyst1 ;
+  v-s:responsible td:RomanKarpov-Analyst1 ;
+  v-wf:onDocument td:TestDocument ;
+  rdfs:label "Исполнить поручение" ;
+  rdfs:comment "Прошу исполнить поручение" ;
 .
 
-td:test-process-start-form1-subform1
-  a s-wf:SimpleRouteStartForm ;
-  s-wf:SimpleRouteStartForm_editable true ;
-  s-wf:SimpleRouteStartForm_participant td:RomanKarpov-Analyst1 ;
-  s-wf:SimpleRouteStartForm_participant td:ValeriyBushenev-Programmer1 ;
-  s-wf:SimpleRouteStartForm_task_label "Согласовать"@ru, "Coordinate"@en ;
-  s-wf:SimpleRouteStartForm_visible true ;
-  v-s:parent td:test-process-start-form1 ;
-  v-s:sum 10 ;
-  v-wf:StartForm_canEdit false ;
+td:TestDocument
+  rdf:type rdfs:Resource ;
+  rdfs:label "Тестовый документ" ;
+  rdfs:comment "Тестовый комментарий" ;
+  v-ui:hasTemplate v-ui:ttl;
 .
