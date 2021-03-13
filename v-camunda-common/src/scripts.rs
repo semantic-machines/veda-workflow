@@ -3,6 +3,7 @@ use serde_json::Value as JSONValue;
 use std::sync::Mutex;
 use v8::json::stringify;
 use v_ft_xapian::xapian_reader::XapianReader;
+use v_module::module::PrepareError;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::individual::Individual;
@@ -15,6 +16,7 @@ use v_v8::rusty_v8 as v8;
 use v_v8::rusty_v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
+use v_v8::session_cache::{commit, Transaction};
 
 pub struct ScriptInfoContext {
     pub trigger_by_event: HashVec<String>,
@@ -126,7 +128,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
     }
 }
 
-pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> bool {
+pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> Result<bool, PrepareError> {
     let compiled_script = if let Some(script) = ctx.workplace.scripts.get(script_id) {
         script.compiled_script
     } else {
@@ -142,6 +144,13 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
         let hs = ContextScope::new(&mut ctx.workplace.scope, ctx.workplace.context);
         let mut local_scope = hs;
 
+        let mut sh_tnx = G_TRANSACTION.lock().unwrap();
+        let tnx = sh_tnx.get_mut();
+        *tnx = Transaction::default();
+        tnx.id = 0;
+        tnx.sys_ticket = ctx.sys_ticket.to_owned();
+        drop(sh_tnx);
+
         if let Some(res) = c.run(&mut local_scope) {
             match out {
                 OutValue::Bool(ov) => {
@@ -151,7 +160,6 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                         } else {
                             *ov = false;
                         }
-                        return true;
                     }
                 }
                 OutValue::Json(ov) => {
@@ -159,7 +167,6 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                         let js_str = jo.to_rust_string_lossy(&mut local_scope);
                         if let Ok(v) = serde_json::from_str(&js_str) {
                             *ov = v;
-                            return true;
                         }
                     }
                 }
@@ -175,22 +182,38 @@ pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut C
                                     }
                                 }
                             }
-                            return true;
                         }
                     }
                 }
                 OutValue::Individual(v) => {
                     if let Some(obj) = res.to_object(&mut local_scope) {
                         v8obj_into_individual(&mut local_scope, obj, v);
-                        return true;
                     }
                 }
                 _ => {}
             }
-        } else {
-            return true;
         }
-    }
+        ctx.count_exec += 1;
 
-    false
+        sh_tnx = G_TRANSACTION.lock().unwrap();
+        let tnx = sh_tnx.get_mut();
+
+        let res = commit(tnx, &mut ctx.veda_client);
+
+        for item in tnx.queue.iter() {
+            info!("tnx item: cmd={:?}, uri={}, res={:?}", item.cmd, item.indv.get_id(), item.rc);
+        }
+
+        drop(sh_tnx);
+
+        info!("{}, {}", ctx.count_exec, script_id);
+
+        if res != ResultCode::Ok {
+            info!("fail exec event script : {}, result={:?}", script_id, res);
+            return Err(PrepareError::Fatal);
+        }
+        return Ok(true);
+    } else {
+        return Ok(false);
+    }
 }
