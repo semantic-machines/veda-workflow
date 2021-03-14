@@ -28,7 +28,7 @@ td:simple-task-process-start-form1
   v-s:creator td:RomanKarpov-Analyst1 ;
   v-s:responsible td:RomanKarpov-Analyst1 ;
   v-wf:onDocument td:TestDocument ;
-  rdfs:label "Исполнить поручение" ;
+  v-s:description "Исполнить поручение" ;
   rdfs:comment "Прошу исполнить поручение" ;
   v-ui:hasTemplate v-ui:ttl;
 .

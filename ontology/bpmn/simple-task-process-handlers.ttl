@@ -108,18 +108,16 @@ console.log('CREATE TASK');
 
 const from_appointment = new veda.IndividualModel(variables.from.value);
 from_appointment.reset();
-const from = [from_appointment['v-s:employee'][0].id, from_appointment['v-s:occupation'][0].id];
-console.log('from', from);
+const from = [from_appointment['v-s:employee'][0], from_appointment['v-s:occupation'][0]];
 
 const to_appointment = new veda.IndividualModel(variables.to.value);
 to_appointment.reset();
-const to = [to_appointment['v-s:employee'][0].id, to_appointment['v-s:occupation'][0].id];
-console.log('to', to);
+const to = [to_appointment['v-s:employee'][0], to_appointment['v-s:occupation'][0]];
 
 const userTask = new veda.IndividualModel();
-userTask['rdf:type'] = 'bpmn:DecisionForm';
-userTask['rdfs:label'] = 'Simple task';
-userTask['rdfs:comment'] = 'Simple task comment';
+userTask['rdf:type'] = ['v-wf:DecisionForm', 'bpmn:DecisionForm'];
+userTask['rdfs:label'] = variables.label.value;
+userTask['rdfs:comment'] = variables.comment.value;
 userTask['bpmn:taskId'] = task.id;
 userTask['v-wf:possibleDecisionClass'] = variables['v-wf:possibleDecisionClass'].value.replace(/\\s+/g, '').split(',');
 userTask['v-s:creator'] = 'cfg:VedaSystem';
