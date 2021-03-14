@@ -21,7 +21,6 @@
 
 # ------------------------------------------------------------
 
-
 td:simple-task-process-start-form1
   rdf:type bpmn:StartForm ;
   bpmn:startProcessId "SimpleTaskProcess" ;
@@ -31,6 +30,7 @@ td:simple-task-process-start-form1
   v-wf:onDocument td:TestDocument ;
   rdfs:label "Исполнить поручение" ;
   rdfs:comment "Прошу исполнить поручение" ;
+  v-ui:hasTemplate v-ui:ttl;
 .
 
 td:TestDocument

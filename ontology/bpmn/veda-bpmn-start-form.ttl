@@ -26,18 +26,17 @@ bpmn:StartForm
   rdfs:label "Start form"@en ;
 .
 bpmn:startProcessId
-  rdf:type owl:ObjectProperty ;
+  rdf:type owl:DatatypeProperty ;
   rdfs:label "Запустить процесс"@ru ;
   rdfs:label "Start process"@en ;
   rdfs:domain bpmn:StartForm ;
   rdfs:range xsd:string ;
 .
 bpmn:startedProcessInstanceId
-  rdf:type owl:ObjectProperty ;
+  rdf:type owl:DatatypeProperty ;
   rdfs:label "Запустить процесс"@ru ;
   rdfs:label "Start process"@en ;
   rdfs:domain bpmn:StartForm ;
-  rdfs:range bpmn:ProcessInstance ;
 .
 bpmn:hasStatus
   rdf:type owl:ObjectProperty ;

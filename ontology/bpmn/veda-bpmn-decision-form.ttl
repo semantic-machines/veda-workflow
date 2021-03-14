@@ -26,3 +26,11 @@ bpmn:DecisionForm
   rdfs:label "Decision form"@en ;
   v-ui:hasTemplate s-wf:UserTaskFormTemplate;
 .
+
+bpmn:taskId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Id задачи"@ru ;
+  rdfs:label "Task Id"@en ;
+  rdfs:domain bpmn:DecisionForm ;
+  rdfs:range xsd:string ;
+.
