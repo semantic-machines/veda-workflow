@@ -111,32 +111,56 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
         }
 
         if ttype.unwrap() == "Task" {
+            let event = event.unwrap();
             let task_id = id.unwrap();
-            let task = match ctx.camunda_client.task_api().get_task(&task_id) {
-                Ok(task) => Some(json!(task).to_string()),
-                Err(e) => {
-                    error!("failed to read task {:?}", e);
-                    None
+
+            let mut is_read_task = false;
+            for script_id in ctx.workplace.scripts_order.iter() {
+                if let Some(script) = ctx.workplace.scripts.get(script_id) {
+                    if script.context.trigger_by_event.hash.contains(&event) {
+                        is_read_task = true;
+                        break;
+                    }
                 }
+            }
+
+            let task = if is_read_task {
+                match ctx.camunda_client.task_api().get_task(&task_id) {
+                    Ok(task) => Some(json!(task).to_string()),
+                    Err(e) => {
+                        error!("failed to read task {:?}", e);
+                        None
+                    }
+                }
+            } else {
+                None
             };
 
-            let vars = match ctx.camunda_client.task_api().get_variables(&task_id, None, Some(false)) {
-                Ok(res) => Some(json!(res).to_string()),
-                Err(e) => {
-                    error!("failed to read variables {:?}", e);
-                    None
+            let vars = if is_read_task {
+                match ctx.camunda_client.task_api().get_variables(&task_id, None, Some(false)) {
+                    Ok(res) => Some(json!(res).to_string()),
+                    Err(e) => {
+                        error!("failed to read variables {:?}", e);
+                        None
+                    }
                 }
+            } else {
+                None
             };
 
-            let form_vars = match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some(false)) {
-                Ok(res) => Some(json!(res).to_string()),
-                Err(e) => {
-                    error!("failed to read form variables {:?}", e);
-                    None
+            let form_vars = if is_read_task {
+                match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some(false)) {
+                    Ok(res) => Some(json!(res).to_string()),
+                    Err(e) => {
+                        error!("failed to read form variables {:?}", e);
+                        None
+                    }
                 }
+            } else {
+                None
             };
 
-            match execute_user_js_task(&event.unwrap(), task, vars, form_vars, ctx) {
+            match execute_user_js_task(&event, task, vars, form_vars, ctx) {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(e);
