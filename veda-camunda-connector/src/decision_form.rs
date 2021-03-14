@@ -18,6 +18,7 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
             vars.insert("takenDecision".to_owned(), var);
             let mut params = CompleteTaskDto::new();
             params.variables = Some(vars);
+            params.with_variables_in_return = Some(true);
 
             match ctx.camunda_client.task_api().complete(&task_id, Some(params)) {
                 Ok(_) => {
