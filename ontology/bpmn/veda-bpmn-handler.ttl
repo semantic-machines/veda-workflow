@@ -11,7 +11,7 @@
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
 @prefix td: <http://semantic-machines.com/veda/test-data/> .
 
-<http://semantic-machines.com/veda/task-handlers>
+<http://semantic-machines.com/veda/bpmn-handlers>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda"@ru ;
   rdfs:label "Veda system ontology"@en ;
@@ -21,23 +21,24 @@
 
 # ------------------------------------------------------------
 
-bpmn:TaskHandler
+bpmn:Handler
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
-  rdfs:label "Обработчик задач"@ru ;
-  rdfs:label "Tasks handler"@en ;
+  rdfs:label "Обработчик"@ru ;
+  rdfs:label "Handler"@en ;
 .
 
 bpmn:disabled
   rdf:type owl:DatatypeProperty ;
-  rdfs:domain bpmn:TaskHandler
+  rdfs:domain bpmn:Handler ;
   rdfs:label "Выключен"@ru ;
   rdfs:label "Disabled"@en ;
   rdfs:range xsd:boolean ;
 .
+
 bpmn:script
   rdf:type owl:DatatypeProperty ;
-  rdfs:domain bpmn:TaskHandler
+  rdfs:domain bpmn:Handler ;
   rdfs:label "Скрипт"@ru ;
   rdfs:label "Script"@en ;
   rdfs:range xsd:string ;
@@ -45,16 +46,32 @@ bpmn:script
 
 # ------------------------------------------------------------
 
-bpmn:UserTaskHandler
+bpmn:EventHandler
   rdf:type owl:Class ;
-  rdfs:subClassOf bpmn:TaskHandler ;
-  rdfs:label "Обработчик пользовательских задач"@ru ;
-  rdfs:label "Camunda user tasks handler"@en ;
+  rdfs:subClassOf bpmn:Handler ;
+  rdfs:label "Обработчик события"@ru ;
+  rdfs:label "Event handler"@en ;
 .
 
 bpmn:triggerByEvent
   rdf:type owl:DatatypeProperty ;
-  rdfs:domain bpmn:ExternalTaskHandler ;
+  rdfs:domain bpmn:EventHandler ;
+  rdfs:label "Срабатывать по событию"@ru ;
+  rdfs:label "Trigger by event"@en ;
+  rdfs:range xsd:string ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:TopicHandler
+  rdf:type owl:Class ;
+  rdfs:subClassOf bpmn:Handler ;
+  rdfs:label "Обработчик топика"@ru ;
+  rdfs:label "Topic handler"@en ;
+.
+bpmn:triggerByTopic
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain bpmn:TopicHandler ;
   rdfs:label "Срабатывать по топику"@ru ;
   rdfs:label "Trigger by topic"@en ;
   rdfs:range xsd:string ;
@@ -62,16 +79,23 @@ bpmn:triggerByEvent
 
 # ------------------------------------------------------------
 
+bpmn:ProcessHandler
+  rdf:type owl:Class ;
+  rdfs:subClassOf bpmn:EventHandler ;
+  rdfs:label "Обработчик процесса"@ru ;
+  rdfs:label "Process handler"@en ;
+.
+
+bpmn:UserTaskHandler
+  rdf:type owl:Class ;
+  rdfs:subClassOf bpmn:EventHandler ;
+  rdfs:label "Обработчик пользовательской задачи"@ru ;
+  rdfs:label "User task handler"@en ;
+.
+
 bpmn:ExternalTaskHandler
   rdf:type owl:Class ;
-  rdfs:subClassOf bpmn:TaskHandler ;
-  rdfs:label "Обработчик внешних задач"@ru ;
-  rdfs:label "ExternalTaskHandler"@en ;
-.
-bpmn:triggerByTopic
-  rdf:type owl:DatatypeProperty ;
-  rdfs:domain bpmn:ExternalTaskHandler ;
-  rdfs:label "Срабатывать по топику"@ru ;
-  rdfs:label "Trigger by topic"@en ;
-  rdfs:range xsd:string ;
+  rdfs:subClassOf bpmn:TopicHandler ;
+  rdfs:label "Обработчик внешней задачи"@ru ;
+  rdfs:label "External task handler"@en ;
 .
