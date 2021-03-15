@@ -34,3 +34,11 @@ bpmn:taskId
   rdfs:domain bpmn:DecisionForm ;
   rdfs:range xsd:string ;
 .
+
+bpmn:processInstanceId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Id экземпляра процесса"@ru ;
+  rdfs:label "Process instance Id"@en ;
+  rdfs:domain bpmn:DecisionForm ;
+  rdfs:range xsd:string ;
+.

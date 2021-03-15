@@ -119,6 +119,7 @@ userTask['rdf:type'] = ['v-wf:DecisionForm', 'bpmn:DecisionForm'];
 userTask['rdfs:label'] = variables.label.value;
 userTask['rdfs:comment'] = variables.comment.value;
 userTask['bpmn:taskId'] = task.id;
+userTask['bpmn:processInstanceId'] = task.processInstanceId;
 userTask['v-wf:possibleDecisionClass'] = variables['v-wf:possibleDecisionClass'].value.replace(/\\s+/g, '').split(',');
 userTask['v-s:creator'] = 'cfg:VedaSystem';
 userTask['v-wf:from'] = from;
