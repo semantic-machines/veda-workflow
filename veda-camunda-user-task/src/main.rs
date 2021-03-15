@@ -6,7 +6,7 @@ extern crate scan_fmt;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use serde_json::json;
-use std::{str, thread};
+use std::{str, thread, time};
 use v_camunda_common::scripts::{load_task_scripts, Context};
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::common::load_onto;
@@ -123,41 +123,35 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     }
                 }
             }
+            
+            if !is_read_task {
+                return Ok(true);
+            }
 
-            let task = if is_read_task {
-                match ctx.camunda_client.task_api().get_task(&task_id) {
-                    Ok(task) => Some(json!(task).to_string()),
-                    Err(e) => {
-                        error!("failed to read task {:?}", e);
-                        None
-                    }
+            thread::sleep(time::Duration::from_millis(100));
+
+            let task = match ctx.camunda_client.task_api().get_task(&task_id) {
+                Ok(task) => Some(json!(task).to_string()),
+                Err(e) => {
+                    error!("failed to read task {:?}", e);
+                    None
                 }
-            } else {
-                None
             };
 
-            let vars = if is_read_task {
-                match ctx.camunda_client.task_api().get_variables(&task_id, None, Some(false)) {
-                    Ok(res) => Some(json!(res).to_string()),
-                    Err(e) => {
-                        error!("failed to read variables {:?}", e);
-                        None
-                    }
+            let vars = match ctx.camunda_client.task_api().get_variables(&task_id, None, Some(false)) {
+                Ok(res) => Some(json!(res).to_string()),
+                Err(e) => {
+                    error!("failed to read variables {:?}", e);
+                    None
                 }
-            } else {
-                None
             };
 
-            let form_vars = if is_read_task {
-                match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some(false)) {
-                    Ok(res) => Some(json!(res).to_string()),
-                    Err(e) => {
-                        error!("failed to read form variables {:?}", e);
-                        None
-                    }
+            let form_vars = match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some(false)) {
+                Ok(res) => Some(json!(res).to_string()),
+                Err(e) => {
+                    error!("failed to read form variables {:?}", e);
+                    None
                 }
-            } else {
-                None
             };
 
             match execute_user_js_task(&event, task, vars, form_vars, ctx) {
