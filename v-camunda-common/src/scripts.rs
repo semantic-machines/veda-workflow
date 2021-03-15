@@ -20,12 +20,14 @@ use v_v8::session_cache::{commit, Transaction};
 
 pub struct ScriptInfoContext {
     pub trigger_by_event: HashVec<String>,
+    pub script_type: HashVec<String>,
 }
 
 impl Default for ScriptInfoContext {
     fn default() -> Self {
         Self {
             trigger_by_event: Default::default(),
+            script_type: Default::default()
         }
     }
 }
@@ -116,6 +118,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(&id, &str_script);
         scr_inf.context.trigger_by_event = HashVec::new(ev_indv.get_literals("bpmn:triggerByEvent").unwrap_or_default());
+        scr_inf.context.script_type = HashVec::new(ev_indv.get_literals("rdf:type").unwrap_or_default());
 
         wp.add_to_order(&scr_inf);
 
@@ -128,7 +131,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
     }
 }
 
-pub fn execute_js(session_data: CallbackSharedData, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> Result<bool, PrepareError> {
+pub fn execute_js_and_return_data(session_data: CallbackSharedData, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> Result<bool, PrepareError> {
     let compiled_script = if let Some(script) = ctx.workplace.scripts.get(script_id) {
         script.compiled_script
     } else {

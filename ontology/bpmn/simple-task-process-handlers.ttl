@@ -152,7 +152,7 @@ console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstance));
 bpmn:ProcessInstanceEndHandler
   rdf:type bpmn:ProcessInstanceHandler ;
   rdfs:label "Обработчик события завершения экземпляра процесса" ;
-  bpmn:triggerByEvent "start" ;
+  bpmn:triggerByEvent "end" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
