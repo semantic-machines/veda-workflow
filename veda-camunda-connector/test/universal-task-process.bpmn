@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0x1ppnw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="UniversalTaskProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1ntibt6</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_1xa2wht" name="Установить права на документ" camunda:type="external" camunda:topic="setRights">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="subject">${ to }</camunda:inputParameter>
+          <camunda:inputParameter name="object">${ document }</camunda:inputParameter>
+          <camunda:inputParameter name="permission">r</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ntibt6</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yjwjdz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1yjwjdz" sourceRef="Activity_1xa2wht" targetRef="Activity_1sypuux" />
+    <bpmn:serviceTask id="Activity_1sypuux" name="Установить статус документа - Исполнение" camunda:type="external" camunda:topic="setProperty">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="property">v-s:hasStatus</camunda:inputParameter>
+          <camunda:inputParameter name="object">${ document }</camunda:inputParameter>
+          <camunda:inputParameter name="value">v-s:StatusExecution</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1yjwjdz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0663m9t</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0663m9t" sourceRef="Activity_1sypuux" targetRef="Activity_19xleoo" />
+    <bpmn:userTask id="Activity_19xleoo" name="Исполнить задачу" camunda:assignee="${ to }">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="v-wf:possibleDecisionClass">v-wf:DecisionBreak, v-wf:DecisionRedirect, v-wf:DecisionAchieved</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0663m9t</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ebod3m</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1ebod3m" sourceRef="Activity_19xleoo" targetRef="Activity_0rcuowe" />
+    <bpmn:userTask id="Activity_0rcuowe" name="Ознакомиться с результатом" camunda:assignee="${ from }">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="v-wf:possibleDecisionClass">v-wf:DecisionConfirm</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ebod3m</bpmn:incoming>
+      <bpmn:outgoing>Flow_03am413</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_0st4taf">
+      <bpmn:incoming>Flow_0ahjkeq</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1ntibt6" sourceRef="StartEvent_1" targetRef="Activity_1xa2wht" />
+    <bpmn:sequenceFlow id="Flow_03am413" sourceRef="Activity_0rcuowe" targetRef="Activity_136gszx" />
+    <bpmn:sequenceFlow id="Flow_0ahjkeq" sourceRef="Activity_136gszx" targetRef="Event_0st4taf" />
+    <bpmn:serviceTask id="Activity_136gszx" name="Установить статус документа - Исполнен" camunda:type="external" camunda:topic="setProperty">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="object">${ document }</camunda:inputParameter>
+          <camunda:inputParameter name="property">v-s:hasStatus</camunda:inputParameter>
+          <camunda:inputParameter name="value">v-s:StatusExecuted</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03am413</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ahjkeq</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="UniversalTaskProcess">
+      <bpmndi:BPMNEdge id="Flow_1ntibt6_di" bpmnElement="Flow_1ntibt6">
+        <di:waypoint x="188" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ebod3m_di" bpmnElement="Flow_1ebod3m">
+        <di:waypoint x="700" y="117" />
+        <di:waypoint x="760" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0663m9t_di" bpmnElement="Flow_0663m9t">
+        <di:waypoint x="540" y="117" />
+        <di:waypoint x="600" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yjwjdz_di" bpmnElement="Flow_1yjwjdz">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="440" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03am413_di" bpmnElement="Flow_03am413">
+        <di:waypoint x="860" y="117" />
+        <di:waypoint x="960" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ahjkeq_di" bpmnElement="Flow_0ahjkeq">
+        <di:waypoint x="1060" y="117" />
+        <di:waypoint x="1132" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0jkz7n4_di" bpmnElement="Activity_1xa2wht">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_176vt3t_di" bpmnElement="Activity_1sypuux">
+        <dc:Bounds x="440" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pt3n79_di" bpmnElement="Activity_19xleoo">
+        <dc:Bounds x="600" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1thkpfs_di" bpmnElement="Activity_0rcuowe">
+        <dc:Bounds x="760" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0st4taf_di" bpmnElement="Event_0st4taf">
+        <dc:Bounds x="1132" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_17uqp6x_di" bpmnElement="Activity_136gszx">
+        <dc:Bounds x="960" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
