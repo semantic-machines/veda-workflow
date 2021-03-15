@@ -23,13 +23,12 @@ import org.camunda.bpm.engine.task.Task;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
 import com.semanticmachines.veda.bpm.VedaTaskListener;
+import com.semanticmachines.veda.bpm.VedaExecutionListener;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,6 +58,9 @@ public class BpmnParseListenerOnUserTaskTest {
     // start the process instance
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bpmnParseListenerOnUserTask");
 
+    // process started = 1
+    assertThat(VedaExecutionListener.callCounter, is(1L));
+    
     // create + assignment = 2
     assertThat(VedaTaskListener.callCounter, is(2L)); 
 
@@ -88,6 +90,9 @@ public class BpmnParseListenerOnUserTaskTest {
                         .processInstanceId(processInstance.getId())
                         .singleResult();
     assertThat(processInstance, is(nullValue()));
+
+    // process ended = 2
+    assertThat(VedaExecutionListener.callCounter, is(2L));
   }
 
 }
