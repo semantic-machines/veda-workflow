@@ -80,7 +80,7 @@ fn set_variables(js_vars: &[&str]) -> String {
     let mut out_str = String::new();
 
     for el in js_vars {
-        if *el == "ticket" {
+        if *el == "ticket" || el.ends_with("_id") || el.ends_with("Id") {
             out_str.push_str(&format!("var {} = get_env_str_var ('${}'); ", el, el));
         } else {
             out_str.push_str(&format!("var {} = JSON.parse(get_env_str_var ('${}')); ", el, el));

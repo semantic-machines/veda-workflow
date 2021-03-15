@@ -65,7 +65,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
         load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:UserTaskHandler", &["ticket", "task", "variables", "form_variables"]);
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ProcessInstanceHandler", &["ticket", "processInstance"]);
+        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ProcessInstanceHandler", &["ticket", "processInstanceId", "processInstance"]);
 
         module.listen_queue_raw(
             &mut queue_consumer,
@@ -163,7 +163,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                 }
             };
 
-            match execute_js_user_task(&event, task, vars, form_vars, ctx) {
+            match execute_js_user_task(&event, stype, task, vars, form_vars, ctx) {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(e);
@@ -184,7 +184,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                 None
             };
 
-            match execute_js_process_instance(&event, process_instance, ctx) {
+            match execute_js_process_instance(&event, stype, Some(process_instance_id), process_instance, ctx) {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(e);
@@ -198,7 +198,14 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
     Ok(true)
 }
 
-pub fn execute_js_user_task(event: &str, task: Option<String>, vars: Option<String>, form_vars: Option<String>, ctx: &mut Context) -> Result<i64, PrepareError> {
+pub fn execute_js_user_task(
+    event: &str,
+    stype: &str,
+    task: Option<String>,
+    vars: Option<String>,
+    form_vars: Option<String>,
+    ctx: &mut Context,
+) -> Result<i64, PrepareError> {
     let mut session_data = CallbackSharedData::default();
     session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
     if let Some(v) = task {
@@ -213,15 +220,20 @@ pub fn execute_js_user_task(event: &str, task: Option<String>, vars: Option<Stri
         session_data.g_key2attr.insert("$form_variables".to_owned(), v);
     }
 
-    execute_js(event, session_data, ctx)
+    execute_js(event, stype, session_data, ctx)
 }
 
-pub fn execute_js_process_instance(event: &str, process_instance: Option<String>, ctx: &mut Context) -> Result<i64, PrepareError> {
+pub fn execute_js_process_instance(
+    event: &str,
+    stype: &str,
+    process_instance_id: Option<String>,
+    process_instance: Option<String>,
+    ctx: &mut Context,
+) -> Result<i64, PrepareError> {
     let mut session_data = CallbackSharedData::default();
     session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
-    if let Some(v) = process_instance {
-        session_data.g_key2attr.insert("$processInstance".to_owned(), v);
-    }
+    session_data.g_key2attr.insert("$processInstance".to_owned(), process_instance.unwrap_or("[]".to_owned()));
+    session_data.g_key2attr.insert("$processInstanceId".to_owned(), process_instance_id.unwrap_or_default());
 
-    execute_js(event, session_data, ctx)
+    execute_js(event, stype, session_data, ctx)
 }
