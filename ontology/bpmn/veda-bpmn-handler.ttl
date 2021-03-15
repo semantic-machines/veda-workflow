@@ -79,7 +79,7 @@ bpmn:triggerByTopic
 
 # ------------------------------------------------------------
 
-bpmn:ProcessHandler
+bpmn:ProcessInstanceHandler
   rdf:type owl:Class ;
   rdfs:subClassOf bpmn:EventHandler ;
   rdfs:label "Обработчик процесса"@ru ;

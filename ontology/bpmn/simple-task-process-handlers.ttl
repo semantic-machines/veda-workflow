@@ -131,3 +131,35 @@ userTask.save();
 
   """ ;
 .
+
+# ------------------------------------------------------------
+
+bpmn:ProcessInstanceStartHandler
+  rdf:type bpmn:ProcessInstanceHandler ;
+  rdfs:label "Обработчик события старта экземпляра процесса" ;
+  bpmn:triggerByEvent "start" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * processInstance = camunda process JSON
+ */
+
+console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstance));
+
+  """ ;
+.
+
+bpmn:ProcessInstanceEndHandler
+  rdf:type bpmn:ProcessInstanceHandler ;
+  rdfs:label "Обработчик события завершения экземпляра процесса" ;
+  bpmn:triggerByEvent "start" ;
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * processInstance = camunda process JSON
+ */
+
+console.log('PROCESS INSTANCE ENDED', JSON.stringify(processInstance));
+
+  """ ;
+.
