@@ -40,6 +40,7 @@ const value = task.variables.value.value;
 console.log(object, property, value);
 
 const individual = new veda.IndividualModel(object);
+individual.reset();
 individual.set(property, value);
 individual.save();
 
@@ -126,8 +127,6 @@ userTask['v-wf:from'] = from;
 userTask['v-wf:to'] = to;
 userTask['v-wf:isCompleted'] = false ;
 userTask['v-wf:onDocument'] = variables.document.value ;
-console.log('userTask', JSON.stringify(userTask.properties, null, 2));
-
 userTask.save();
 
   """ ;
