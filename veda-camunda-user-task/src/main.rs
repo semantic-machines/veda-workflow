@@ -210,8 +210,14 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             let mut session_data = CallbackSharedData::default();
             session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
             session_data.g_key2attr.insert("$processInstanceId".to_owned(), qel.process_instance_id.to_owned());
+            session_data.g_key2attr.insert("$processDefinitionKey".to_owned(), qel.process_definition_key.to_owned());
+            session_data.g_key2attr.insert("$event".to_owned(), qel.event.to_owned());
+            session_data.g_key2attr.insert("$elementType".to_owned(), qel.element_type.to_owned());
+            session_data.g_key2attr.insert("$elementId".to_owned(), qel.element_id.to_owned());
 
             if qel.event_type == "UserTaskEvent" {
+                session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
+
                 thread::sleep(time::Duration::from_millis(100));
 
                 match ctx.camunda_client.task_api().get_task(&qel.id) {
@@ -232,14 +238,25 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     }
                 }
             } else if qel.event_type == "ExecutionEvent" {
+                session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
+
                 thread::sleep(time::Duration::from_millis(1000));
-                if qel.event == "start" {
-                    match ctx.camunda_client.process_instance_api().get_process_instance(&qel.id) {
-                        Ok(p) => {
-                            session_data.g_key2attr.insert("$processInstance".to_owned(), json!(p).to_string());
+                if qel.event != "end" {
+                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
+                        Ok(v) => {
+                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
                         }
                         Err(e) => {
-                            error!("failed to read processInstance {:?}", e);
+                            error!("failed to read variables {:?}", e);
+                        }
+                    }
+
+                    match ctx.camunda_client.execution_api().get_execution(&qel.id) {
+                        Ok(p) => {
+                            session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read execution {:?}", e);
                         }
                     }
                 }

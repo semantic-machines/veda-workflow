@@ -58,6 +58,8 @@ mod schema_log_api;
 pub use self::schema_log_api::{ SchemaLogApi, SchemaLogApiClient };
 mod signal_api;
 pub use self::signal_api::{ SignalApi, SignalApiClient };
+mod execution_api;
+pub use self::execution_api::{ ExecutionApi, ExecutionApiClient };
 mod task_api;
 pub use self::task_api::{ TaskApi, TaskApiClient };
 mod task_attachment_api;

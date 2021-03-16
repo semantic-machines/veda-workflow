@@ -17,6 +17,7 @@ pub struct APIClient {
     process_instance_api: Box<dyn crate::apis::ProcessInstanceApi>,
     schema_log_api: Box<dyn crate::apis::SchemaLogApi>,
     signal_api: Box<dyn crate::apis::SignalApi>,
+    execution_api: Box<dyn crate::apis::ExecutionApi>,
     task_api: Box<dyn crate::apis::TaskApi>,
     task_attachment_api: Box<dyn crate::apis::TaskAttachmentApi>,
     task_comment_api: Box<dyn crate::apis::TaskCommentApi>,
@@ -47,6 +48,7 @@ impl APIClient {
             process_instance_api: Box::new(crate::apis::ProcessInstanceApiClient::new(rc.clone())),
             schema_log_api: Box::new(crate::apis::SchemaLogApiClient::new(rc.clone())),
             signal_api: Box::new(crate::apis::SignalApiClient::new(rc.clone())),
+            execution_api: Box::new(crate::apis::ExecutionApiClient::new(rc.clone())),
             task_api: Box::new(crate::apis::TaskApiClient::new(rc.clone())),
             task_attachment_api: Box::new(crate::apis::TaskAttachmentApiClient::new(rc.clone())),
             task_comment_api: Box::new(crate::apis::TaskCommentApiClient::new(rc.clone())),
@@ -113,6 +115,10 @@ impl APIClient {
 
     pub fn signal_api(&self) -> &dyn crate::apis::SignalApi{
         self.signal_api.as_ref()
+    }
+
+    pub fn execution_api(&self) -> &dyn crate::apis::ExecutionApi{
+        self.execution_api.as_ref()
     }
 
     pub fn task_api(&self) -> &dyn crate::apis::TaskApi{
