@@ -100,6 +100,7 @@ bpmn:AssignmentHandler
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
+ * queue event string
  * task = camunda task object
  * variables = camunda task variables object
  */
@@ -137,9 +138,11 @@ bpmn:ProcessInstanceStartHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события старта экземпляра процесса" ;
   bpmn:triggerByEvent "start" ;
+  bpmn:triggerByProcessId "SimpleTaskProcess" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
+ * event = queue event string
  * execution = camunda execution object
  * variables = camunda execution variables object
  */
@@ -153,9 +156,11 @@ bpmn:ProcessInstanceEndHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события завершения экземпляра процесса" ;
   bpmn:triggerByEvent "end" ;
+  bpmn:triggerByProcessId "SimpleTaskProcess" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
+ * queue event string
  * execution = camunda execution object
  * variables = camunda execution variables object
  */
