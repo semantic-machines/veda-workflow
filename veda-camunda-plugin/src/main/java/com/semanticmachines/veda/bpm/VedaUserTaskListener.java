@@ -25,7 +25,7 @@ public class VedaUserTaskListener implements TaskListener {
     return instance;
   }
 
-  /*
+  /**
    * Put a message in the queue with the following format:
    * UserTaskEvent:{event},{taskId},{processInstanceId},{processDefinitionKey},{elementType},{elementId}
    */
@@ -43,7 +43,7 @@ public class VedaUserTaskListener implements TaskListener {
   }
 
   private String getProcessDefinitionKey(String processDefinitionId) {
-    String idPattern = "^(.+?):.+?:.+?$"; 
+    String idPattern = "^(.+?):.*$"; 
     return processDefinitionId.replaceAll(idPattern, "$1");
   }
 

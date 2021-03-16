@@ -2,11 +2,10 @@ package com.semanticmachines.veda.bpm;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
-
 import java.util.logging.Logger;
 
 /**
- * Execution listener to be executed when a process instance event is fired
+ * Execution listener to be executed when an execution event is fired
  */
 public class VedaExecutionListener implements ExecutionListener {
   
@@ -26,7 +25,7 @@ public class VedaExecutionListener implements ExecutionListener {
     return instance;
   }
   
-  /*
+  /**
    * Put a message in the queue with the following format:
    * ExecutionEvent:{event},{executionId},{processInstanceId},{processDefinitionKey},{elementType},{elementId}
    */
@@ -49,7 +48,7 @@ public class VedaExecutionListener implements ExecutionListener {
   }
 
   private String getProcessDefinitionKey(String processDefinitionId) {
-    String idPattern = "^(.+?):.+?:.+?$"; 
+    String idPattern = "^(.+?):.*$"; 
     return processDefinitionId.replaceAll(idPattern, "$1");
   }
 }
