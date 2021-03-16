@@ -15,13 +15,14 @@ public class VedaExecutionListener implements ExecutionListener {
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   public static long callCounter = 0;
 
-  protected VedaExecutionListener() {}
+  protected VedaExecutionListener() {
+    queueWriter = VedaQueueWriter.getInstance();
+  }
   
   public static VedaExecutionListener getInstance() {
     if (instance == null) {
         instance = new VedaExecutionListener();
     }
-    queueWriter = VedaQueueWriter.getInstance();
     return instance;
   }
   

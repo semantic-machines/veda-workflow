@@ -14,13 +14,14 @@ public class VedaUserTaskListener implements TaskListener {
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   public static long callCounter = 0;
 
-  protected VedaUserTaskListener() {}
+  protected VedaUserTaskListener() {
+    queueWriter = VedaQueueWriter.getInstance();
+  }
   
   public static VedaUserTaskListener getInstance() {
     if (instance == null) {
       instance = new VedaUserTaskListener();
     }
-    queueWriter = VedaQueueWriter.getInstance(); 
     return instance;
   }
 
