@@ -64,7 +64,7 @@ fn main() -> Result<(), i32> {
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler", &["ticket", "task"]);
+        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler", &[("ticket","string"), ("task","object")]);
 
         let worker_id = "camunda-external-task";
 

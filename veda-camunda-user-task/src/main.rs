@@ -5,7 +5,7 @@ extern crate scan_fmt;
 
 mod common;
 
-use crate::common::execute_js;
+use crate::common::{check_filters, execute_js};
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use serde_json::json;
@@ -64,8 +64,37 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         };
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
 
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:UserTaskHandler", &["ticket", "task", "variables", "form_variables"]);
-        load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ProcessInstanceHandler", &["ticket", "processInstanceId", "processInstance"]);
+        load_task_scripts(
+            &mut ctx.workplace,
+            &mut ctx.xr,
+            "bpmn:UserTaskHandler",
+            &[
+                ("event", "string"),
+                ("taskId", "string"),
+                ("processInstanceId", "string"),
+                ("processDefinitionKey", "string"),
+                ("elementType", "string"),
+                ("elementId", "string"),
+                ("task", "object"),
+                ("variables", "object"),
+            ],
+        );
+
+        load_task_scripts(
+            &mut ctx.workplace,
+            &mut ctx.xr,
+            "bpmn:ExecutionHandler",
+            &[
+                ("event", "string"),
+                ("executionId", "string"),
+                ("processInstanceId", "string"),
+                ("processDefinitionKey", "string"),
+                ("elementType", "string"),
+                ("elementId", "string"),
+                ("execution", "object"),
+                ("variables", "object"),
+            ],
+        );
 
         module.listen_queue_raw(
             &mut queue_consumer,
@@ -101,90 +130,122 @@ fn prepare<'a>(module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawOb
     }
 }
 
+pub struct QueueElement {
+    rtype: String,
+    event_type: String,
+    event: String,
+    id: String,
+    process_instance_id: String,
+    process_definition_key: String,
+    element_type: String,
+    element_id: String,
+}
+
 fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
-        let (event, ttype, id) = scan_fmt_some!(el_str, "{},{}[{}]", String, String, String);
+        let (event_type, event, id, process_instance_id, process_definition_key, element_type, element_id) =
+            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{}", String, String, String, String, String, String, String);
 
-        if event.is_none() || ttype.is_none() || id.is_none() {
-            error!("failed to parse queue element, data={:?}", queue_element.data);
+        if event_type.is_none()
+            || event.is_none()
+            || id.is_none()
+            || process_instance_id.is_none()
+            || process_definition_key.is_none()
+            || element_type.is_none()
+            || element_id.is_none()
+        {
+            error!("failed to parse queue element, data={:?}", el_str);
             return Ok(true);
-        }
-
-        let event = event.unwrap();
-        let ttype = ttype.unwrap();
-        let stype = if ttype == "Task" {
-            "bpmn:UserTaskHandler"
-        } else if ttype == "ProcessInstance" {
-            "bpmn:ProcessInstanceHandler"
         } else {
-            ""
-        };
-
-        let mut is_found_script = false;
-        for script_id in ctx.workplace.scripts_order.iter() {
-            if let Some(script) = ctx.workplace.scripts.get(script_id) {
-                if script.context.trigger_by_event.hash.contains(&event) && script.context.script_type.hash.contains(stype) {
-                    is_found_script = true;
-                    break;
+            let event_type = event_type.unwrap();
+            let qel = if event_type == "UserTaskHandler" {
+                QueueElement {
+                    rtype: "bpmn:UserTaskEvent".to_owned(),
+                    event_type,
+                    event: event.unwrap(),
+                    id: id.unwrap(),
+                    process_instance_id: process_instance_id.unwrap(),
+                    process_definition_key: process_definition_key.unwrap(),
+                    element_type: element_type.unwrap(),
+                    element_id: element_id.unwrap(),
                 }
-            }
-        }
-
-        if !is_found_script {
-            return Ok(true);
-        }
-
-        if ttype == "Task" {
-            let task_id = id.unwrap();
-
-            thread::sleep(time::Duration::from_millis(100));
-
-            let task = match ctx.camunda_client.task_api().get_task(&task_id) {
-                Ok(t) => Some(json!(t).to_string()),
-                Err(e) => {
-                    error!("failed to read task {:?}", e);
-                    None
-                }
-            };
-
-            let vars = match ctx.camunda_client.task_api().get_variables(&task_id, None, Some(false)) {
-                Ok(res) => Some(json!(res).to_string()),
-                Err(e) => {
-                    error!("failed to read variables {:?}", e);
-                    None
-                }
-            };
-
-            let form_vars = match ctx.camunda_client.task_api().get_form_variables(&task_id, None, Some(false)) {
-                Ok(res) => Some(json!(res).to_string()),
-                Err(e) => {
-                    error!("failed to read form variables {:?}", e);
-                    None
-                }
-            };
-
-            match execute_js_user_task(&event, stype, task, vars, form_vars, ctx) {
-                Ok(_) => {}
-                Err(e) => {
-                    return Err(e);
-                }
-            }
-        } else if ttype == "ProcessInstance" {
-            let process_instance_id = id.unwrap();
-            thread::sleep(time::Duration::from_millis(1000));
-            let process_instance = if event == "start" {
-                match ctx.camunda_client.process_instance_api().get_process_instance(&process_instance_id) {
-                    Ok(p) => Some(json!(p).to_string()),
-                    Err(e) => {
-                        error!("failed to read processInstance {:?}", e);
-                        None
-                    }
+            } else if event_type == "ExecutionEvent" {
+                QueueElement {
+                    rtype: "bpmn:ExecutionHandler".to_owned(),
+                    event_type,
+                    event: event.unwrap(),
+                    id: id.unwrap(),
+                    process_instance_id: process_instance_id.unwrap(),
+                    process_definition_key: process_definition_key.unwrap(),
+                    element_type: element_type.unwrap(),
+                    element_id: element_id.unwrap(),
                 }
             } else {
-                None
+                QueueElement {
+                    rtype: "".to_string(),
+                    event_type: "".to_string(),
+                    event: "".to_string(),
+                    id: "".to_string(),
+                    process_instance_id: "".to_string(),
+                    process_definition_key: "".to_string(),
+                    element_type: "".to_string(),
+                    element_id: "".to_string(),
+                }
             };
 
-            match execute_js_process_instance(&event, stype, Some(process_instance_id), process_instance, ctx) {
+            let mut is_found_script = false;
+            for script_id in ctx.workplace.scripts_order.iter() {
+                if let Some(script) = ctx.workplace.scripts.get(script_id) {
+                    if check_filters(script, &qel) {
+                        is_found_script = true;
+                        break;
+                    }
+                }
+            }
+
+            if !is_found_script {
+                return Ok(true);
+            }
+
+            let mut session_data = CallbackSharedData::default();
+            session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
+            session_data.g_key2attr.insert("$processInstanceId".to_owned(), qel.process_instance_id.to_owned());
+
+            if qel.event_type == "UserTaskEvent" {
+                thread::sleep(time::Duration::from_millis(100));
+
+                match ctx.camunda_client.task_api().get_task(&qel.id) {
+                    Ok(v) => {
+                        session_data.g_key2attr.insert("$task".to_owned(), json!(v).to_string());
+                    }
+                    Err(e) => {
+                        error!("failed to read task {:?}", e);
+                    }
+                }
+
+                match ctx.camunda_client.task_api().get_variables(&qel.id, None, Some(false)) {
+                    Ok(v) => {
+                        session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                    }
+                    Err(e) => {
+                        error!("failed to read variables {:?}", e);
+                    }
+                }
+            } else if qel.event_type == "ExecutionEvent" {
+                thread::sleep(time::Duration::from_millis(1000));
+                if qel.event == "start" {
+                    match ctx.camunda_client.process_instance_api().get_process_instance(&qel.id) {
+                        Ok(p) => {
+                            session_data.g_key2attr.insert("$processInstance".to_owned(), json!(p).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read processInstance {:?}", e);
+                        }
+                    }
+                }
+            }
+
+            match execute_js(&qel, session_data, ctx) {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(e);
@@ -196,44 +257,4 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
     }
 
     Ok(true)
-}
-
-pub fn execute_js_user_task(
-    event: &str,
-    stype: &str,
-    task: Option<String>,
-    vars: Option<String>,
-    form_vars: Option<String>,
-    ctx: &mut Context,
-) -> Result<i64, PrepareError> {
-    let mut session_data = CallbackSharedData::default();
-    session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
-    if let Some(v) = task {
-        session_data.g_key2attr.insert("$task".to_owned(), v);
-    }
-
-    if let Some(v) = vars {
-        session_data.g_key2attr.insert("$variables".to_owned(), v);
-    }
-
-    if let Some(v) = form_vars {
-        session_data.g_key2attr.insert("$form_variables".to_owned(), v);
-    }
-
-    execute_js(event, stype, session_data, ctx)
-}
-
-pub fn execute_js_process_instance(
-    event: &str,
-    stype: &str,
-    process_instance_id: Option<String>,
-    process_instance: Option<String>,
-    ctx: &mut Context,
-) -> Result<i64, PrepareError> {
-    let mut session_data = CallbackSharedData::default();
-    session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
-    session_data.g_key2attr.insert("$processInstance".to_owned(), process_instance.unwrap_or("[]".to_owned()));
-    session_data.g_key2attr.insert("$processInstanceId".to_owned(), process_instance_id.unwrap_or_default());
-
-    execute_js(event, stype, session_data, ctx)
 }

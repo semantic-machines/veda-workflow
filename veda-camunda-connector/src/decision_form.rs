@@ -1,6 +1,5 @@
 use crate::Context;
 use camunda_client::models::{CompleteTaskDto, VariableValueDto};
-use serde_json::json;
 use std::collections::HashMap;
 use std::error::Error;
 use v_module::module::Module;

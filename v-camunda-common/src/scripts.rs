@@ -19,14 +19,20 @@ use v_v8::session_cache::CallbackSharedData;
 use v_v8::session_cache::{commit, Transaction};
 
 pub struct ScriptInfoContext {
-    pub trigger_by_event: HashVec<String>,
+    pub trigger_by_event: Option<HashVec<String>>,
+    pub trigger_by_process_id: Option<HashVec<String>>,
+    pub trigger_by_element_type: Option<HashVec<String>>,
+    pub trigger_by_element_id: Option<HashVec<String>>,
     pub script_type: HashVec<String>,
 }
 
 impl Default for ScriptInfoContext {
     fn default() -> Self {
         Self {
-            trigger_by_event: Default::default(),
+            trigger_by_event: None,
+            trigger_by_process_id: None,
+            trigger_by_element_type: None,
+            trigger_by_element_id: None,
             script_type: Default::default()
         }
     }
@@ -63,7 +69,7 @@ impl Drop for SetupGuard {
     }
 }
 
-pub fn load_task_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut XapianReader, task_type: &str, js_vars: &[&str]) {
+pub fn load_task_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut XapianReader, task_type: &str, js_vars: &[(&str, &str)]) {
     let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", &format!("'rdf:type' === '{}'", task_type)), &mut wp.module.storage);
 
     if res.result_code == ResultCode::Ok && res.count > 0 {
@@ -76,20 +82,22 @@ pub fn load_task_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut 
     info!("load scripts from db: {:?}", wp.scripts_order);
 }
 
-fn set_variables(js_vars: &[&str]) -> String {
+fn define_variables(js_vars: &[(&str, &str)]) -> String {
     let mut out_str = String::new();
 
-    for el in js_vars {
-        if *el == "ticket" || el.ends_with("_id") || el.ends_with("Id") {
-            out_str.push_str(&format!("var {} = get_env_str_var ('${}'); ", el, el));
+    for (var_name, var_type) in js_vars {
+        if *var_type == "string" {
+            out_str.push_str(&format!("var {} = get_env_str_var ('${}'); ", var_name, var_name));
+        } else if *var_type == "object" {
+            out_str.push_str(&format!("var {} = ((tmp) => tmp ? JSON.parse(tmp) : tmp)(get_env_str_var('${}'));", var_name, var_name));
         } else {
-            out_str.push_str(&format!("var {} = JSON.parse(get_env_str_var ('${}')); ", el, el));
+            error! ("unknown variable type {} for {}", var_name, var_type);
         }
     }
     out_str
 }
 
-pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_indv: &mut Individual, js_vars: &[&str]) {
+pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_indv: &mut Individual, js_vars: &[(&str, &str)]) {
     if ev_indv.is_exists_bool("v-s:deleted", true) || ev_indv.is_exists_bool("v-s:disabled", true) {
         info!("disable script {}", ev_indv.get_id());
         if let Some(scr_inf) = wp.scripts.get_mut(ev_indv.get_id()) {
@@ -104,7 +112,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         try { \
           "
         .to_owned()
-            + &set_variables(js_vars)
+            + &define_variables(js_vars)
             + &script_text
             + " \
          } catch (e) { log_trace (e.stack); } \
@@ -117,7 +125,23 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         };
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(&id, &str_script);
-        scr_inf.context.trigger_by_event = HashVec::new(ev_indv.get_literals("bpmn:triggerByEvent").unwrap_or_default());
+
+        if let Some (h) = ev_indv.get_literals("bpmn:triggerByEvent") {
+            scr_inf.context.trigger_by_event = Some (HashVec::new(h));
+        }
+
+        if let Some (h) = ev_indv.get_literals("bpmn:triggerByProcessId") {
+            scr_inf.context.trigger_by_process_id = Some (HashVec::new(h));
+        }
+
+        if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementType") {
+            scr_inf.context.trigger_by_element_type = Some (HashVec::new(h));
+        }
+
+        if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementId") {
+            scr_inf.context.trigger_by_element_id = Some (HashVec::new(h));
+        }
+
         scr_inf.context.script_type = HashVec::new(ev_indv.get_literals("rdf:type").unwrap_or_default());
 
         wp.add_to_order(&scr_inf);

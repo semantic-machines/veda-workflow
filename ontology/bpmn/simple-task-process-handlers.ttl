@@ -147,7 +147,7 @@ bpmn:ProcessInstanceStartHandler
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstance));
+console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstanceId));
 
   """ ;
 .
