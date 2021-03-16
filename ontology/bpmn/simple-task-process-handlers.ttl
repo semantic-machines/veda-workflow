@@ -100,9 +100,8 @@ bpmn:AssignmentHandler
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * task = camunda task JSON
- * variables = camunda task variables
- * form_variables = camunda form variables
+ * task = camunda task object
+ * variables = camunda task variables object
  */
 
 console.log('CREATE TASK');
@@ -135,13 +134,14 @@ userTask.save();
 # ------------------------------------------------------------
 
 bpmn:ProcessInstanceStartHandler
-  rdf:type bpmn:ProcessInstanceHandler ;
+  rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события старта экземпляра процесса" ;
   bpmn:triggerByEvent "start" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * processInstance = camunda process JSON
+ * execution = camunda execution object
+ * variables = camunda execution variables object
  */
 
 console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstance));
@@ -150,24 +150,25 @@ console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstance));
 .
 
 bpmn:ProcessInstanceEndHandler
-  rdf:type bpmn:ProcessInstanceHandler ;
+  rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события завершения экземпляра процесса" ;
   bpmn:triggerByEvent "end" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * processInstance = camunda process JSON
+ * execution = camunda execution object
+ * variables = camunda execution variables object
  */
 
 console.log('PROCESS INSTANCE ENDED', JSON.stringify(processInstance));
 
-const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:processInstanceId'=='${processInstance.id}' && 'v-wf:isCompleted'==false`;
+const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:processInstanceId'=='${execution.processInstanceId}' && 'v-wf:isCompleted'==false`;
 veda.Backend.query(veda.ticket, queryString).then(queryResult => {
   const tasks = queryResult.result;
   tasks.forEach(task => {
     veda.Backend.remove_individual(veda.ticket, task)
-      .then(() => console.log(`Task removed for stopped process instance, task = ${task}, process = ${processInstance.id}`))
-      .catch(error => console.log(`Error removing task for stopped process, task = ${task}, process = ${processInstance.id}`, error.stack));
+      .then(() => console.log(`Task removed for stopped process instance, task = ${task}, process = ${execution.processInstanceId}`))
+      .catch(error => console.log(`Error removing task for stopped process, task = ${task}, process = ${execution.processInstanceId}`, error.stack));
   });
 });
 

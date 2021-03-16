@@ -61,6 +61,30 @@ bpmn:triggerByEvent
   rdfs:range xsd:string ;
 .
 
+bpmn:triggerByProcessId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain bpmn:EventHandler ;
+  rdfs:label "Срабатывать по id процесса"@ru ;
+  rdfs:label "Trigger by process id"@en ;
+  rdfs:range xsd:string ;
+.
+
+bpmn:triggerByElementType
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain bpmn:EventHandler ;
+  rdfs:label "Срабатывать по типу элемента"@ru ;
+  rdfs:label "Trigger by element type"@en ;
+  rdfs:range xsd:string ;
+.
+
+bpmn:triggerByElementId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain bpmn:EventHandler ;
+  rdfs:label "Срабатывать по id элемента"@ru ;
+  rdfs:label "Trigger by element id"@en ;
+  rdfs:range xsd:string ;
+.
+
 # ------------------------------------------------------------
 
 bpmn:TopicHandler
@@ -79,11 +103,11 @@ bpmn:triggerByTopic
 
 # ------------------------------------------------------------
 
-bpmn:ProcessInstanceHandler
+bpmn:ExecutionHandler
   rdf:type owl:Class ;
   rdfs:subClassOf bpmn:EventHandler ;
-  rdfs:label "Обработчик процесса"@ru ;
-  rdfs:label "Process handler"@en ;
+  rdfs:label "Обработчик исполнения"@ru ;
+  rdfs:label "Execution handler"@en ;
 .
 
 bpmn:UserTaskHandler
