@@ -22,7 +22,7 @@ import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
-import com.semanticmachines.veda.bpm.VedaTaskListener;
+import com.semanticmachines.veda.bpm.VedaUserTaskListener;
 import com.semanticmachines.veda.bpm.VedaExecutionListener;
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,30 +59,30 @@ public class BpmnParseListenerOnUserTaskTest {
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bpmnParseListenerOnUserTask");
 
     // process started = 1
-    assertThat(VedaExecutionListener.callCounter, is(1L));
+    assertThat(VedaExecutionListener.callCounter, is(5L));
     
     // create + assignment = 2
-    assertThat(VedaTaskListener.callCounter, is(2L)); 
+    assertThat(VedaUserTaskListener.callCounter, is(2L)); 
 
     // complete first user task
     Task task = taskService.createTaskQuery().singleResult();
     taskService.complete(task.getId());
   
     // create + assignment + complete + create + assignment = 5
-    assertThat(VedaTaskListener.callCounter, is(5L));   
+    assertThat(VedaUserTaskListener.callCounter, is(5L));   
     
     // reset the assignee
     task = taskService.createTaskQuery().singleResult();
     taskService.setAssignee(task.getId(), "Kermit");
 
     // create + assignment + complete + create + assignment + update + assignment = 7
-    assertThat(VedaTaskListener.callCounter, is(7L));
+    assertThat(VedaUserTaskListener.callCounter, is(7L));
 
     // complete second user task
     taskService.complete(task.getId());
     
     // create + assignment + complete + create + assignment + update + assignment + complete = 8    
-    assertThat(VedaTaskListener.callCounter, is(8L)); 
+    assertThat(VedaUserTaskListener.callCounter, is(8L)); 
 
     // check if process instance ended
     processInstance = runtimeService
@@ -91,8 +91,8 @@ public class BpmnParseListenerOnUserTaskTest {
                         .singleResult();
     assertThat(processInstance, is(nullValue()));
 
-    // process ended = 2
-    assertThat(VedaExecutionListener.callCounter, is(2L));
+    // process ended = 13
+    assertThat(VedaExecutionListener.callCounter, is(13L));
   }
 
 }

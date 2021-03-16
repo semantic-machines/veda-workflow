@@ -2,6 +2,7 @@ package com.semanticmachines.veda.bpm;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+
 import java.util.logging.Logger;
 
 /**
@@ -28,9 +29,22 @@ public class VedaExecutionListener implements ExecutionListener {
   public void notify(DelegateExecution execution) throws Exception {
     callCounter++;
     String event = execution.getEventName();
-    LOGGER.info("[" + callCounter + "] Task event: '" + event + "', execution: " + execution);
-    
-    queueWriter.queue.push(event + "," + execution);
+    String executionId = execution.getId();
+    String processDefinitionKey = getProcessDefinitionKey(execution.getProcessDefinitionId());
+    String elementType = execution.getBpmnModelElementInstance().getElementType().getTypeName();
+    String elementId;
+    if (event == "take") {
+      elementId = execution.getCurrentTransitionId();
+    } else {
+      elementId = execution.getCurrentActivityId();
+    }
+    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processDefinitionKey, elementType, elementId);
+    queueWriter.queue.push(msg);
+    LOGGER.info("queue: " + msg);
   }
 
+  private String getProcessDefinitionKey(String processDefinitionId) {
+    String idPattern = "^(.+?):.+?:.+?$"; 
+    return processDefinitionId.replaceAll(idPattern, "$1");
+  }
 }
