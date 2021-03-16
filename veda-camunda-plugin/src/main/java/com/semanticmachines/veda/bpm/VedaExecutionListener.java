@@ -25,7 +25,10 @@ public class VedaExecutionListener implements ExecutionListener {
     return instance;
   }
   
-  //Possible events = start, end
+  /*
+   * Put a message in the queue with the following format:
+   * ExecutionEvent:{event},{executionId},{processInstanceId},{processDefinitionKey},{elementType},{elementId}
+   */
   public void notify(DelegateExecution execution) throws Exception {
     callCounter++;
     String event = execution.getEventName();
@@ -38,7 +41,8 @@ public class VedaExecutionListener implements ExecutionListener {
     } else {
       elementId = execution.getCurrentActivityId();
     }
-    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processDefinitionKey, elementType, elementId);
+    String processInstanceId = execution.getProcessInstanceId();
+    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processInstanceId, processDefinitionKey, elementType, elementId);
     queueWriter.queue.push(msg);
     LOGGER.info("queue: " + msg);
   }

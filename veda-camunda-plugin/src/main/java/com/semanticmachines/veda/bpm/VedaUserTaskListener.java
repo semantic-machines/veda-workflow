@@ -24,7 +24,10 @@ public class VedaUserTaskListener implements TaskListener {
     return instance;
   }
 
-  // Possible events = create, assignment, complete, update, delete, timeout
+  /*
+   * Put a message in the queue with the following format:
+   * UserTaskEvent:{event},{taskId},{processInstanceId},{processDefinitionKey},{elementType},{elementId}
+   */
   public void notify(DelegateTask delegateTask) {
     callCounter++;
     String event = delegateTask.getEventName();
@@ -32,7 +35,8 @@ public class VedaUserTaskListener implements TaskListener {
     String processDefinitionKey = getProcessDefinitionKey(delegateTask.getProcessDefinitionId());
     String elementType = delegateTask.getBpmnModelElementInstance().getElementType().getTypeName();
     String elementId = delegateTask.getTaskDefinitionKey();
-    String msg = "UserTaskEvent:" + String.join(",", event, taskId, processDefinitionKey, elementType, elementId);
+    String processInstanceId = delegateTask.getProcessInstanceId();
+    String msg = "UserTaskEvent:" + String.join(",", event, taskId, processInstanceId, processDefinitionKey, elementType, elementId);
     queueWriter.queue.push(msg);
     LOGGER.info("queue: " + msg);
   }
