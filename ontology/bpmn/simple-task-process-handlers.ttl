@@ -97,6 +97,9 @@ bpmn:AssignmentHandler
   rdf:type bpmn:UserTaskHandler ;
   rdfs:label "Обработчик события 'assignment'" ;
   bpmn:triggerByEvent "assignment" ;
+#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByElementType "userTask";
+#  bpmn:triggerByElementId "userTask_1";
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
@@ -139,13 +142,49 @@ userTask.save();
   """ ;
 .
 
+bpmn:TaskDeletionHandler
+  rdf:type bpmn:UserTaskHandler ;
+  rdfs:label "Обработчик события 'delete'" ;
+  bpmn:triggerByEvent "delete" ;
+#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByElementType "userTask";
+#  bpmn:triggerByElementId "userTask_1";
+  bpmn:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * event = task event
+ * taskId = task id
+ * processInstanceId = process instance id
+ * processDefinitionKey = process definition id
+ * elementType = task element type
+ * elementId = execution element id
+ * task = camunda task object
+ * variables = camunda task variables object
+ */
+
+console.log('REMOVE TASK');
+const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:taskId'=='\\\\"${taskId}\\\\"'`;
+veda.Backend.query(veda.ticket, queryString).then(queryResult => {
+  const tasks = queryResult.result;
+  tasks.forEach(task => {
+    veda.Backend.remove_individual(veda.ticket, task)
+      .then(() => console.log(`Task removed: task = ${task}, process = ${processInstanceId}`))
+      .catch(error => console.log(`Error removing task: ${task}, process = ${processInstanceId}`, error.stack));
+  });
+});
+
+  """ ;
+.
+
 # ------------------------------------------------------------
 
 bpmn:ProcessInstanceStartHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события старта экземпляра процесса" ;
   bpmn:triggerByEvent "start" ;
-  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+  bpmn:triggerByElementType "startEvent";
+#  bpmn:triggerByElementId "startEvent";
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
@@ -159,7 +198,7 @@ bpmn:ProcessInstanceStartHandler
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE STARTED', JSON.stringify(execution));
+console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId);
 
   """ ;
 .
@@ -168,7 +207,9 @@ bpmn:ProcessInstanceEndHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события завершения экземпляра процесса" ;
   bpmn:triggerByEvent "end" ;
-  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+  bpmn:triggerByElementType "endEvent";
+#  bpmn:triggerByElementId "startEvent";
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
@@ -182,17 +223,7 @@ bpmn:ProcessInstanceEndHandler
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE ENDED', processInstanceId);
-
-const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:processInstanceId'=='${processInstanceId}' && 'v-wf:isCompleted'==false`;
-veda.Backend.query(veda.ticket, queryString).then(queryResult => {
-  const tasks = queryResult.result;
-  tasks.forEach(task => {
-    veda.Backend.remove_individual(veda.ticket, task)
-      .then(() => console.log(`Task removed for stopped process instance, task = ${task}, process = ${processInstanceId}`))
-      .catch(error => console.log(`Error removing task for stopped process, task = ${task}, process = ${processInstanceId}`, error.stack));
-  });
-});
+console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId);
 
   """ ;
 .
