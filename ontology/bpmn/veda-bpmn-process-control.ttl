@@ -84,3 +84,24 @@ bpmn:ProcessInstanceRequest
   rdfs:label "Запрос к экземпляру процесса"@ru ;
   rdfs:label "Process instance request"@en ;
 .
+
+bpmn:ProcessInstanceStopRequest
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Запрос останова экземпляра процесса"@ru ;
+  rdfs:label "Process instance stop request"@en ;
+.
+
+bpmn:ProcessInstanceMessageRequest
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Запрос посылки сообщения экземпляру процесса"@ru ;
+  rdfs:label "Process instance message request"@en ;
+.
+
+bpmn:ProcessInstanceEventRequest
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Запрос вызова события в экземпляре процесса"@ru ;
+  rdfs:label "Process instance event trigger request"@en ;
+.
