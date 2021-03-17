@@ -38,7 +38,7 @@
         <camunda:in source="to" target="to" />
         <camunda:in source="from" target="from" />
         <camunda:in source="label" target="label" />
-        <camunda:in source="comment" target="comment" />
+        <camunda:in source="description" target="description" />
         <camunda:out source="takenDecision" target="takenDecision" />
         <camunda:in sourceExpression="${ &#39;v-wf:DecisionRedirect, v-wf:DecisionAchieved&#39; }" target="possibleDecision" />
       </bpmn:extensionElements>
@@ -63,7 +63,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:outputParameter name="to">${ takenDecision.jsonPath("$.v-wf:to[0].data").stringValue() }</camunda:outputParameter>
-          <camunda:outputParameter name="comment">${ takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue() }</camunda:outputParameter>
+          <camunda:outputParameter name="description">${ takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue() }</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0d9kj68</bpmn:incoming>
@@ -75,7 +75,7 @@
         <camunda:in source="document" target="document" />
         <camunda:in source="to" target="from" />
         <camunda:in source="controller" target="to" />
-        <camunda:in sourceExpression="${ takenDecision.jsonPath(&#34;$.rdfs:comment[0].data&#34;).stringValue() }" target="comment" />
+        <camunda:in sourceExpression="${ takenDecision.jsonPath(&#34;$.rdfs:comment[0].data&#34;).stringValue() }" target="description" />
         <camunda:in sourceExpression="${&#39;Ознакомиться с результатом&#39;}" target="label" />
         <camunda:in sourceExpression="${ &#39;v-wf:DecisionConfirm, v-wf:DecisionRemake&#39; }" target="possibleDecision" />
         <camunda:out source="takenDecision" target="takenDecision" />
@@ -99,7 +99,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:outputParameter name="label">Доработать</camunda:outputParameter>
-          <camunda:outputParameter name="comment">${ takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue() }</camunda:outputParameter>
+          <camunda:outputParameter name="description">${ takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue() }</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1mns35f</bpmn:incoming>
@@ -111,7 +111,7 @@
 from
 to
 document
-comment
+description
 label
 dateTo
 controller</bpmn:text>
@@ -206,7 +206,7 @@ controller</bpmn:text>
         <dc:Bounds x="530" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_12h3gyq_di" bpmnElement="TextAnnotation_12h3gyq">
-        <dc:Bounds x="120" y="160" width="100" height="124" />
+        <dc:Bounds x="120" y="160" width="99.99274099883856" height="123.98373983739837" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ptjlrc_di" bpmnElement="Activity_0rcuowe">
         <dc:Bounds x="745" y="230" width="100" height="80" />

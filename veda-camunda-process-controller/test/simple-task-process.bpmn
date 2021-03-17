@@ -14,7 +14,7 @@
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:creator[0].data&#34;).stringValue() }" target="from" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:responsible[0].data&#34;).stringValue() }" target="to" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-wf:onDocument[0].data&#34;).stringValue() }" target="document" />
-        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.rdfs:comment[0].data&#34;).stringValue() }" target="comment" />
+        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:description[0].data&#34;).stringValue() }" target="description" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.rdfs:label[0].data&#34;).stringValue() }" target="label" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:dateTo[0].data&#34;).stringValue() }" target="dateTo" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:controller[0].data&#34;).stringValue() }" target="controller" />

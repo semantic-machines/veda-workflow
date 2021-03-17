@@ -30,7 +30,7 @@
 from
 to
 document
-comment
+description
 label
 dateTo
 possibleDecision</bpmn:text>
@@ -39,20 +39,17 @@ possibleDecision</bpmn:text>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ElementalTaskProcess">
-      <bpmndi:BPMNShape id="TextAnnotation_0wmqwfu_di" bpmnElement="TextAnnotation_0wmqwfu">
-        <dc:Bounds x="137" y="80" width="113" height="130" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_193wt9v_di" bpmnElement="Flow_193wt9v">
-        <di:waypoint x="215" y="317" />
-        <di:waypoint x="290" y="317" />
+      <bpmndi:BPMNEdge id="Flow_1mih2xz_di" bpmnElement="Flow_1mih2xz">
+        <di:waypoint x="570" y="317" />
+        <di:waypoint x="642" y="317" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ezp59b_di" bpmnElement="Flow_0ezp59b">
         <di:waypoint x="390" y="317" />
         <di:waypoint x="470" y="317" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1mih2xz_di" bpmnElement="Flow_1mih2xz">
-        <di:waypoint x="570" y="317" />
-        <di:waypoint x="642" y="317" />
+      <bpmndi:BPMNEdge id="Flow_193wt9v_di" bpmnElement="Flow_193wt9v">
+        <di:waypoint x="215" y="317" />
+        <di:waypoint x="290" y="317" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="299" width="36" height="36" />
@@ -60,11 +57,14 @@ possibleDecision</bpmn:text>
       <bpmndi:BPMNShape id="Activity_0th4w1b_di" bpmnElement="Activity_0th4w1b">
         <dc:Bounds x="290" y="277" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0s0in15_di" bpmnElement="Activity_0s0in15">
+        <dc:Bounds x="470" y="277" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0yivluy_di" bpmnElement="Event_0yivluy">
         <dc:Bounds x="642" y="299" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0s0in15_di" bpmnElement="Activity_0s0in15">
-        <dc:Bounds x="470" y="277" width="100" height="80" />
+      <bpmndi:BPMNShape id="TextAnnotation_0wmqwfu_di" bpmnElement="TextAnnotation_0wmqwfu">
+        <dc:Bounds x="137" y="80" width="113" height="130" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_0piuk43_di" bpmnElement="Association_0piuk43">
         <di:waypoint x="197" y="299" />
