@@ -1,0 +1,68 @@
+СОБЫТИЯ:
+Сейчас есть 2 типа сообщений:
+  UserTaskEvent:{event},{taskId},{processDefinitionId},{elementType},{elementId}
+  пример: UserTaskEvent:create,442,UnversalTaskProcess,userTask,task_1
+  
+  ExecutionEvent:{event},{executionId},{processDefinitionId},{elementType},{elementId}
+  пример: ExecutionEvent:take,123,UnversalTaskProcess,sequenceFlow,flow_1
+
+ОНТОЛОГИЯ: 
+Есть 3 класса обработчиков: bpmn:ExternalTaskHandler (без изменений), bpmn:UserTaskHandler, bpmn:ExecutionHandler.
+Фильтры для bpmn:UserTaskHandler и bpmn:ExecutionHandler унифицированы и включают следующие параметры:
+bpmn:triggerByEvent
+bpmn:triggerByProcessId
+bpmn:triggerByElementType
+bpmn:triggerByElementId
+
+ОБРАБОТЧИК СОБЫТИЙ:
+Обработчик может содержать любой набор параметров фильтрации. Обработчик должен вызываться, если событие соответствует указанным фильтрам. Отсутствующие параметры фильтрации игнорируются при проверке.
+Например, если у обработчика типа bpmn:UserTaskHandler указан набор
+bpmn:triggerByProcessId = "UniversalTaskProcess"
+bpmn:triggerByEvent = "create"
+Он должен быть вызван для всех событий создания задачи в процессе UniversalTaskProcess.
+
+ПОЛЬЗОВАТЕЛЬСКИЙ JS:
+В вызов скрипта типа bpmn:UserTaskHandler должны передаваться параметры:
+ticket
+event - строка сообщения очереди, по которой сработал обработчик
+task - объект задачи
+variables - переменные задачи
+Изменения: 
+form_variables - не нужны, там ничего отличного от variables нет.
+добавлен параметр event.
+
+В вызов скрипта типа bpmn:ExecutionHandler должны передаваться параметры:
+ticket
+event - строка сообщения очереди, по которой сработал обработчик
+execution - объект исполнения
+variables - переменные контекста исполнения
+
+execution можно получить по id вызвав
+GET /execution/{id}
+https://docs.camunda.org/manual/latest/reference/rest/execution/get/
+
+variables можно получить по id вызвав
+GET /execution/{id}/localVariables?deserializeValues=false
+https://docs.camunda.org/manual/latest/reference/rest/execution/local-variables/get-local-variables
+
+перечень переменных передаваемых в js
+UserTaskHandler:
+event (string)
+taskId (string)
+processInstanceId (string)
+processDefinitionKey (string)
+elementType (string)
+elementId (string)
+task (object)
+variables (object)
+
+ExecutionHandler:
+event (string)
+executionId (string)
+processInstanceId (string)
+processDefinitionKey (string)
+elementType (string)
+elementId (string)
+execution (object)
+variables (object)
+

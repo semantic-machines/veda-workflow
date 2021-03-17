@@ -1,38 +1,36 @@
+build_server_module () {
+    BUILD_PATH=$PWD
+    VEDA_BIN=$BUILD_PATH/bin
+    module_name=$1
+
+    echo $module_name
+    rm ./$module_name
+
+    cd $module_name
+    cargo build --release
+    status=$?
+    if test $status -ne 0
+    then
+        exit $status;
+    fi
+    cd $BUILD_PATH
+    cp $CARGO_TARGET_DIR/release/$module_name $VEDA_BIN
+}
+
 BUILD_PATH=$PWD
 
 mkdir ./bin
 VEDA_BIN=$BUILD_PATH/bin
 
-if [ $1 == "camunda-user-task" ] || [ $1 == "veda-camunda-user-task" ] || [ -z $1 ]; then
-    echo BUILD veda-camunda-user-task
-    rm ./veda-camunda-user-task
-
-    cd veda-camunda-user-task
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-camunda-user-task $VEDA_BIN
-
+if [ $1 == "camunda-event-handler" ] || [ $1 == "veda-camunda-event-handler" ] || [ -z $1 ]; then
+    build_server_module "veda-camunda-event-handler"
 fi
 
-if [ $1 == "camunda-external-task" ] || [ $1 == "veda-camunda-external-task" ] || [ -z $1 ]; then
-    echo BUILD veda-camunda-external-task
-    rm ./veda-camunda-external-task
-
-    cd veda-camunda-external-task
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-camunda-external-task $VEDA_BIN
-
+if [ $1 == "camunda-external-task-worker" ] || [ $1 == "veda-camunda-external-task-worker" ] || [ -z $1 ]; then
+    build_server_module "veda-camunda-external-task-worker"
 fi
 
-if [ $1 == "camunda-connector" ] || [ $1 == "veda-camunda-connector" ] || [ -z $1 ]; then
-    echo BUILD veda-camunda-connector
-    rm ./veda-camunda-connector
-
-    cd veda-camunda-connector
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-camunda-connector $VEDA_BIN
-
+if [ $1 == "camunda-process-controller" ] || [ $1 == "veda-camunda-process-controller" ] || [ -z $1 ]; then
+    build_server_module "veda-camunda-process-controller"
 fi
 
