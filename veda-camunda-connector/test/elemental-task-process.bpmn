@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1qpwf27" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="ElementalTaskProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_193wt9v</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_0th4w1b" name="Установить права на документ" camunda:type="external" camunda:topic="setRights">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="subject">${ to }</camunda:inputParameter>
+          <camunda:inputParameter name="object">${ document }</camunda:inputParameter>
+          <camunda:inputParameter name="permission">r</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_193wt9v</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ezp59b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_193wt9v" sourceRef="StartEvent_1" targetRef="Activity_0th4w1b" />
+    <bpmn:userTask id="Activity_0s0in15" name="Исполнить задачу" camunda:assignee="${ to }">
+      <bpmn:incoming>Flow_0ezp59b</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mih2xz</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0ezp59b" sourceRef="Activity_0th4w1b" targetRef="Activity_0s0in15" />
+    <bpmn:endEvent id="Event_0yivluy">
+      <bpmn:incoming>Flow_1mih2xz</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1mih2xz" sourceRef="Activity_0s0in15" targetRef="Event_0yivluy" />
+    <bpmn:textAnnotation id="TextAnnotation_0wmqwfu">
+      <bpmn:text>Переменные:
+from
+to
+document
+comment
+label
+dateTo
+possibleDecision</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0piuk43" sourceRef="StartEvent_1" targetRef="TextAnnotation_0wmqwfu" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ElementalTaskProcess">
+      <bpmndi:BPMNShape id="TextAnnotation_0wmqwfu_di" bpmnElement="TextAnnotation_0wmqwfu">
+        <dc:Bounds x="137" y="80" width="113" height="130" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_193wt9v_di" bpmnElement="Flow_193wt9v">
+        <di:waypoint x="215" y="317" />
+        <di:waypoint x="290" y="317" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ezp59b_di" bpmnElement="Flow_0ezp59b">
+        <di:waypoint x="390" y="317" />
+        <di:waypoint x="470" y="317" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mih2xz_di" bpmnElement="Flow_1mih2xz">
+        <di:waypoint x="570" y="317" />
+        <di:waypoint x="642" y="317" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="299" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0th4w1b_di" bpmnElement="Activity_0th4w1b">
+        <dc:Bounds x="290" y="277" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0yivluy_di" bpmnElement="Event_0yivluy">
+        <dc:Bounds x="642" y="299" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0s0in15_di" bpmnElement="Activity_0s0in15">
+        <dc:Bounds x="470" y="277" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0piuk43_di" bpmnElement="Association_0piuk43">
+        <di:waypoint x="197" y="299" />
+        <di:waypoint x="197" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
