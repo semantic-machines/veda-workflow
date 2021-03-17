@@ -1,9 +1,10 @@
 #[macro_use]
 extern crate log;
 
-use crate::common::{is_decision_form, is_start_form};
+use crate::common::is_content_type;
 use crate::decision_form::prepare_decision_form;
 use crate::start_form::prepare_start_form;
+use crate::stop_process::prepare_stop_process;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use std::error::Error;
@@ -17,6 +18,7 @@ use v_queue::consumer::Consumer;
 mod common;
 mod decision_form;
 mod start_form;
+mod stop_process;
 
 pub struct Context {
     sys_ticket: String,
@@ -114,13 +116,18 @@ fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut I
 
     let rdf_types = new_state.get_literals("rdf:type").unwrap_or_default();
 
-    if is_start_form(&rdf_types, &mut ctx.onto) && signal == "?" {
+    if is_content_type(&rdf_types, "bpmn:StartForm", &mut ctx.onto) && signal == "?" {
         prepare_start_form(&mut new_state, ctx, module, &signal)?;
         return Ok(true);
     }
 
-    if is_decision_form(&rdf_types, &mut ctx.onto) && signal == "?" {
+    if is_content_type(&rdf_types, "bpmn:DecisionForm", &mut ctx.onto) && signal == "?" {
         prepare_decision_form(&mut new_state, ctx, module, &signal)?;
+        return Ok(true);
+    }
+
+    if is_content_type(&rdf_types, "bpmn:ProcessInstanceStopRequest", &mut ctx.onto) && signal == "?" {
+        prepare_stop_process(&mut new_state, ctx, module, &signal)?;
         return Ok(true);
     }
 

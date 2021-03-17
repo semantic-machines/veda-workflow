@@ -1,6 +1,9 @@
 use std::error::Error;
 use std::fmt;
 use v_module::module::Module;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
+use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
 
@@ -32,29 +35,6 @@ pub fn add_right(subj_uri: &str, obj_uri: &str, ctx: &mut Context, module: &mut 
     Ok(())
 }
 */
-pub(crate) fn is_start_form(rdf_types: &[String], onto: &mut Onto) -> bool {
-    for itype in rdf_types {
-        if itype == "bpmn:StartForm" {
-            return true;
-        }
-        if onto.is_some_entered(&itype, &["bpmn:StartForm"]) {
-            return true;
-        }
-    }
-    false
-}
-
-pub(crate) fn is_decision_form(rdf_types: &[String], onto: &mut Onto) -> bool {
-    for itype in rdf_types {
-        if itype == "bpmn:DecisionForm" {
-            return true;
-        }
-        if onto.is_some_entered(&itype, &["bpmn:DecisionForm"]) {
-            return true;
-        }
-    }
-    false
-}
 
 pub fn get_individual(module: &mut Module, uri: &str) -> Result<Individual, Box<dyn Error>> {
     let mut indv = Individual::default();
@@ -62,4 +42,29 @@ pub fn get_individual(module: &mut Module, uri: &str) -> Result<Individual, Box<
         return Err(Box::new(MyError(format!("individual {} not found", uri))));
     }
     Ok(indv)
+}
+
+pub(crate) fn is_content_type(rdf_types: &[String], check_type: &str, onto: &mut Onto) -> bool {
+    for itype in rdf_types {
+        if itype == check_type {
+            return true;
+        }
+        if onto.is_some_entered(&itype, &[check_type]) {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn set_err(module: &mut Module, sys_ticket: &str, indv: &mut Individual, err_text: &str) {
+    indv.parse_all();
+    indv.set_string("v-s:errorMessage", err_text, Lang::RU);
+    indv.set_uri("v-s:lastEditor", "cfg:VedaSystemAppointment");
+
+    let res = module.api.update(sys_ticket, IndvOp::Put, indv);
+    if res.result != ResultCode::Ok {
+        error!("fail update, uri={}, result_code={:?}", indv.get_id(), res.result);
+    } else {
+        info!("success update, uri={}", indv.get_id());
+    }
 }

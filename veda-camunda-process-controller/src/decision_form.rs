@@ -1,3 +1,4 @@
+use crate::common::set_err;
 use crate::Context;
 use camunda_client::models::{CompleteTaskDto, VariableValueDto};
 use serde_json::json;
@@ -26,10 +27,11 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
                         decision_form.parse_all();
                         decision_form.set_bool("v-wf:isCompleted", true);
                         module.api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &decision_form)?;
-                        info!("prepare_decision_form: success send task complete")
+                        info!("prepare_decision_form: success send task complete");
                     }
                     Err(e) => {
-                        error!("prepare_decision_form: failed to send task complete, err={:?}", e)
+                        error!("prepare_decision_form: failed to send task complete, err={:?}", e);
+                        set_err(module, &ctx.sys_ticket, decision_form, &format!("{:?}", e));
                     }
                 }
             } else {

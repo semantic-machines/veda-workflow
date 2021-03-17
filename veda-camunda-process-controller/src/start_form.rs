@@ -1,4 +1,4 @@
-use crate::common::get_individual;
+use crate::common::{get_individual, set_err};
 use crate::Context;
 use serde_json::json;
 
@@ -55,6 +55,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
                 }
                 Err(e) => {
                     error!("fail execute process instance, err={:?}", e);
+                    set_err(module, &ctx.sys_ticket, start_form, &format!("{:?}", e));
                 }
             };
         }
