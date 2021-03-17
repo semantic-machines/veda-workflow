@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate log;
 
-use crate::common::is_content_type;
+use crate::common::{is_content_type, CVI_USER_NAME};
 use crate::decision_form::prepare_decision_form;
 use crate::start_form::prepare_start_form;
 use crate::stop_process::prepare_stop_process;
@@ -115,7 +115,7 @@ fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut I
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
     if let Some(v) = new_state.get_first_literal("v-s:lastEditor") {
-        if v == "cfg:VedaSystemAppointment" {
+        if v == CVI_USER_NAME {
             return Ok(true);
         }
     }

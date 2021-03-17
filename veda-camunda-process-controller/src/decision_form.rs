@@ -1,4 +1,4 @@
-use crate::common::set_err;
+use crate::common::{set_err, CVI_USER_NAME};
 use crate::Context;
 use camunda_client::models::{CompleteTaskDto, VariableValueDto};
 use serde_json::json;
@@ -26,7 +26,7 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
                     Ok(_) => {
                         decision_form.parse_all();
                         decision_form.set_bool("v-wf:isCompleted", true);
-                        decision_form.set_uri("v-s:lastEditor", "cfg:VedaSystemAppointment");
+                        decision_form.set_uri("v-s:lastEditor", CVI_USER_NAME);
                         module.api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &decision_form)?;
                         info!("prepare_decision_form: success send task complete");
                     }

@@ -157,6 +157,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
 
 pub fn execute_js_and_return_data(session_data: CallbackSharedData, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> Result<bool, PrepareError> {
     let compiled_script = if let Some(script) = ctx.workplace.scripts.get(script_id) {
+        info!("script:{}", script.id);
         script.compiled_script
     } else {
         None

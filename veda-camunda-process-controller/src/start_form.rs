@@ -1,4 +1,4 @@
-use crate::common::{get_individual, set_err};
+use crate::common::{get_individual, set_err, CVI_USER_NAME};
 use crate::Context;
 use serde_json::json;
 
@@ -51,7 +51,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
                     updated_start_form.set_id(start_form.get_id());
                     updated_start_form.set_uri("bpmn:hasStatus", "bpmn:Started");
                     updated_start_form.set_string("bpmn:processInstanceId", &res.id.unwrap_or_default(), Lang::NONE);
-                    updated_start_form.set_uri("v-s:lastEditor", "cfg:VedaSystemAppointment");
+                    updated_start_form.set_uri("v-s:lastEditor", CVI_USER_NAME);
                     module.api.update_or_err(&ctx.sys_ticket, "", "start-process", IndvOp::SetIn, &updated_start_form)?;
                 }
                 Err(e) => {

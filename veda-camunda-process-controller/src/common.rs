@@ -16,6 +16,8 @@ impl fmt::Display for MyError {
     }
 }
 
+pub const CVI_USER_NAME: &str = "cfg:VedaCamunda";
+
 impl Error for MyError {}
 /*
 pub fn add_right(subj_uri: &str, obj_uri: &str, ctx: &mut Context, module: &mut Module) -> Result<(), Box<dyn Error>> {
@@ -59,7 +61,7 @@ pub(crate) fn is_content_type(rdf_types: &[String], check_type: &str, onto: &mut
 pub fn set_err(module: &mut Module, sys_ticket: &str, indv: &mut Individual, err_text: &str) {
     indv.parse_all();
     indv.set_string("v-s:errorMessage", err_text, Lang::RU);
-    indv.set_uri("v-s:lastEditor", "cfg:VedaSystemAppointment");
+    indv.set_uri("v-s:lastEditor", CVI_USER_NAME);
 
     let res = module.api.update(sys_ticket, IndvOp::Put, indv);
     if res.result != ResultCode::Ok {
