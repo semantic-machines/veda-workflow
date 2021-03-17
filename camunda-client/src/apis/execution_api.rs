@@ -47,7 +47,7 @@ impl ExecutionApi for ExecutionApiClient {
         let configuration: &configuration::Configuration = self.configuration.borrow();
         let client = &configuration.client;
 
-        let uri_str = format!("{}/task/{id}/localVariables", configuration.base_path, id=crate::apis::urlencode(id));
+        let uri_str = format!("{}/execution/{id}/localVariables", configuration.base_path, id=crate::apis::urlencode(id));
         let mut req_builder = client.get(uri_str.as_str());
 
         if let Some(ref s) = variable_names {

@@ -23,6 +23,8 @@ use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 
+const REST_TIMEOUT: time::Duration = time::Duration::from_millis(1000);
+
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-USER-TASK");
     thread::spawn(move || inproc_storage_manager());
@@ -158,9 +160,9 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             return Ok(true);
         } else {
             let event_type = event_type.unwrap();
-            let qel = if event_type == "UserTaskHandler" {
+            let qel = if event_type == "UserTaskEvent" {
                 QueueElement {
-                    rtype: "bpmn:UserTaskEvent".to_owned(),
+                    rtype: "bpmn:UserTaskHandler".to_owned(),
                     event_type,
                     event: event.unwrap(),
                     id: id.unwrap(),
@@ -218,7 +220,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             if qel.event_type == "UserTaskEvent" {
                 session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
 
-                thread::sleep(time::Duration::from_millis(100));
+                thread::sleep(REST_TIMEOUT);
 
                 match ctx.camunda_client.task_api().get_task(&qel.id) {
                     Ok(v) => {
@@ -240,23 +242,24 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             } else if qel.event_type == "ExecutionEvent" {
                 session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
 
-                thread::sleep(time::Duration::from_millis(1000));
-                if qel.event != "end" {
-                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
-                        Ok(v) => {
-                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
-                        }
-                        Err(e) => {
-                            error!("failed to read variables {:?}", e);
-                        }
-                    }
+                thread::sleep(REST_TIMEOUT);
 
+                if qel.event != "end" {
                     match ctx.camunda_client.execution_api().get_execution(&qel.id) {
                         Ok(p) => {
                             session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
                         }
                         Err(e) => {
                             error!("failed to read execution {:?}", e);
+                        }
+                    }
+
+                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
+                        Ok(v) => {
+                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read variables {:?}", e);
                         }
                     }
                 }
