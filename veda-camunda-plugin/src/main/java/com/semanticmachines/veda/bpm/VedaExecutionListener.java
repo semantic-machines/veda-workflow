@@ -2,6 +2,10 @@ package com.semanticmachines.veda.bpm;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import org.camunda.bpm.model.xml.type.ModelElementType;
+
 import java.util.logging.Logger;
 
 /**
@@ -34,7 +38,16 @@ public class VedaExecutionListener implements ExecutionListener {
     String event = execution.getEventName();
     String executionId = execution.getId();
     String processDefinitionKey = getProcessDefinitionKey(execution.getProcessDefinitionId());
-    String elementType = execution.getBpmnModelElementInstance().getElementType().getTypeName();
+    
+    String elementType = null;
+    ModelElementInstance modelInstance = (ModelElementInstance) execution.getBpmnModelElementInstance();
+    if (modelInstance != null) {
+      ModelElementType modelElementType = modelInstance.getElementType();
+      if (modelElementType != null) {
+        elementType = modelElementType.getTypeName();
+      }
+    }
+
     String elementId;
     if (event == "take") {
       elementId = execution.getCurrentTransitionId();
