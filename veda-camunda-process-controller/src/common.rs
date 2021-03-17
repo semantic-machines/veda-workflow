@@ -65,6 +65,6 @@ pub fn set_err(module: &mut Module, sys_ticket: &str, indv: &mut Individual, err
     if res.result != ResultCode::Ok {
         error!("fail update, uri={}, result_code={:?}", indv.get_id(), res.result);
     } else {
-        info!("success update, uri={}", indv.get_id());
+        //info!("success update, uri={}", indv.get_id());
     }
 }

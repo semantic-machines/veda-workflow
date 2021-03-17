@@ -114,6 +114,12 @@ fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut I
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
+    if let Some(v) = new_state.get_first_literal("v-s:lastEditor") {
+        if v == "cfg:VedaSystemAppointment" {
+            return Ok(true);
+        }
+    }
+
     let rdf_types = new_state.get_literals("rdf:type").unwrap_or_default();
 
     if is_content_type(&rdf_types, "bpmn:StartForm", &mut ctx.onto) && signal == "?" {
