@@ -21,20 +21,23 @@
 
 # ------------------------------------------------------------
 
+
 td:simple-task-process-start-form1
   rdf:type bpmn:StartForm ;
   bpmn:startProcessId "SimpleTaskProcess" ;
   bpmn:hasStatus bpmn:ToBeStarted ;
   v-s:creator td:RomanKarpov-Analyst1 ;
   v-s:responsible td:RomanKarpov-Analyst1 ;
+  v-s:controller td:RomanKarpov-Analyst1 ;
+  v-s:dateTo "2021-03-17T09:41:00Z"^^xsd:dateTime ;
   v-wf:onDocument td:TestDocument ;
-  v-s:description "Исполнить поручение" ;
+  rdfs:label "Исполнить поручение" ;
   rdfs:comment "Прошу исполнить поручение" ;
   v-ui:hasTemplate v-ui:ttl;
 .
 
 td:TestDocument
-  rdf:type rdfs:Resource ;
+  rdf:type rdfs:Resource, v-s:Journaling ;
   rdfs:label "Тестовый документ" ;
   rdfs:comment "Тестовый комментарий" ;
   v-ui:hasTemplate v-ui:ttl;

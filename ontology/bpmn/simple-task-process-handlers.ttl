@@ -100,7 +100,11 @@ bpmn:AssignmentHandler
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * queue event string
+ * event = task event
+ * processInstanceId = process instance id
+ * processDefinitionKey = process definition id
+ * elementType = task element type
+ * elementId = execution element id
  * task = camunda task object
  * variables = camunda task variables object
  */
@@ -121,7 +125,7 @@ userTask['rdfs:label'] = variables.label.value;
 userTask['rdfs:comment'] = variables.comment.value;
 userTask['bpmn:taskId'] = task.id;
 userTask['bpmn:processInstanceId'] = task.processInstanceId;
-userTask['v-wf:possibleDecisionClass'] = variables['v-wf:possibleDecisionClass'].value.replace(/\\s+/g, '').split(',');
+userTask['v-wf:possibleDecisionClass'] = variables.possibleDecision.value.replace(/\\s+/g, '').split(',');
 userTask['v-s:creator'] = 'cfg:VedaSystem';
 userTask['v-wf:from'] = from;
 userTask['v-wf:to'] = to;
@@ -142,12 +146,16 @@ bpmn:ProcessInstanceStartHandler
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * event = queue event string
+ * event = execution event
+ * processInstanceId = process instance id
+ * processDefinitionKey = process definition id
+ * elementType = execution element type
+ * elementId = execution element id
  * execution = camunda execution object
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE STARTED', JSON.stringify(processInstanceId));
+console.log('PROCESS INSTANCE STARTED', JSON.stringify(execution));
 
   """ ;
 .
@@ -160,20 +168,24 @@ bpmn:ProcessInstanceEndHandler
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
- * queue event string
+ * event = execution event
+ * processInstanceId = process instance id
+ * processDefinitionKey = process definition id
+ * elementType = execution element type
+ * elementId = execution element id
  * execution = camunda execution object
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE ENDED', JSON.stringify(processInstance));
+console.log('PROCESS INSTANCE ENDED', processInstanceId);
 
-const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:processInstanceId'=='${execution.processInstanceId}' && 'v-wf:isCompleted'==false`;
+const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:processInstanceId'=='${processInstanceId}' && 'v-wf:isCompleted'==false`;
 veda.Backend.query(veda.ticket, queryString).then(queryResult => {
   const tasks = queryResult.result;
   tasks.forEach(task => {
     veda.Backend.remove_individual(veda.ticket, task)
-      .then(() => console.log(`Task removed for stopped process instance, task = ${task}, process = ${execution.processInstanceId}`))
-      .catch(error => console.log(`Error removing task for stopped process, task = ${task}, process = ${execution.processInstanceId}`, error.stack));
+      .then(() => console.log(`Task removed for stopped process instance, task = ${task}, process = ${processInstanceId}`))
+      .catch(error => console.log(`Error removing task for stopped process, task = ${task}, process = ${processInstanceId}`, error.stack));
   });
 });
 

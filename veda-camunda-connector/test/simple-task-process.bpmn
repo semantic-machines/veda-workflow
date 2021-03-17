@@ -15,7 +15,9 @@
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:responsible[0].data&#34;).stringValue() }" target="to" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-wf:onDocument[0].data&#34;).stringValue() }" target="document" />
         <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.rdfs:comment[0].data&#34;).stringValue() }" target="comment" />
-        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:description[0].data&#34;).stringValue() }" target="label" />
+        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.rdfs:label[0].data&#34;).stringValue() }" target="label" />
+        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:dateTo[0].data&#34;).stringValue() }" target="dateTo" />
+        <camunda:in sourceExpression="${ startForm.jsonPath(&#34;$.v-s:controller[0].data&#34;).stringValue() }" target="controller" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0tsics7</bpmn:incoming>
       <bpmn:outgoing>Flow_1e8ugrn</bpmn:outgoing>
@@ -23,13 +25,13 @@
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SimpleTaskProcess">
-      <bpmndi:BPMNEdge id="Flow_0tsics7_di" bpmnElement="Flow_0tsics7">
-        <di:waypoint x="215" y="117" />
-        <di:waypoint x="330" y="117" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1e8ugrn_di" bpmnElement="Flow_1e8ugrn">
         <di:waypoint x="430" y="117" />
         <di:waypoint x="552" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tsics7_di" bpmnElement="Flow_0tsics7">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="330" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="99" width="36" height="36" />
