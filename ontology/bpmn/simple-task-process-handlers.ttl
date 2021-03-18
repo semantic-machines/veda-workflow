@@ -39,10 +39,12 @@ const value = task.variables.value.value;
 
 console.log(object, property, value);
 
-const individual = new veda.IndividualModel(object);
-individual.reset();
-individual.set(property, value);
-individual.save();
+if (object && property && typeof value !== 'undefined') {
+  const individual = new veda.IndividualModel(object);
+  individual.reset();
+  individual.set(property, value);
+  individual.save();
+}
 
 return {
   setProperty: {
@@ -80,7 +82,10 @@ permission = permission.split('').map(char => {
 }).filter(Boolean);
 
 console.log(subject, object, permission);
-veda.Util.addRight(ticket, subject, object, permission);
+
+if (subject && object && permission.length) {
+  veda.Util.addRight(ticket, subject, object, permission);
+}
 
 return {
   setRights: {
