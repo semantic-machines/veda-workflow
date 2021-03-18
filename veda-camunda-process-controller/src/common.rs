@@ -16,7 +16,7 @@ impl fmt::Display for MyError {
     }
 }
 
-pub const CVI_USER_NAME: &str = "cfg:VedaCamunda";
+pub const CVI_USER_NAME: &str = "cfg:BPMNEngine";
 
 impl Error for MyError {}
 /*
