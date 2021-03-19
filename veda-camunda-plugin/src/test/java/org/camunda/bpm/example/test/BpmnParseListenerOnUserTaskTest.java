@@ -56,7 +56,7 @@ public class BpmnParseListenerOnUserTaskTest {
   public void testBpmnParseListener() throws IOException {
 
     // start the process instance
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bpmnParseListenerOnUserTask");
+    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bpmnParseListenerOnUserTask", "test-business-key");
 
     // process started = 1
     assertThat(VedaExecutionListener.callCounter, is(5L));

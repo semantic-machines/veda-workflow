@@ -55,7 +55,8 @@ public class VedaExecutionListener implements ExecutionListener {
       elementId = execution.getCurrentActivityId();
     }
     String processInstanceId = execution.getProcessInstanceId();
-    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processInstanceId, processDefinitionKey, elementType, elementId);
+    String businessKey = execution.getBusinessKey();
+    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processInstanceId, businessKey, processDefinitionKey, elementType, elementId);
     queueWriter.queue.push(msg);
     LOGGER.info("queue: " + msg);
   }

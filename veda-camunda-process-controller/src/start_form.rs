@@ -42,6 +42,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
             }
 
             params.variables = Some(vars);
+            params.business_key = Some(start_form.get_id().to_owned());
             match ctx.camunda_client.process_definition_api().start_process_instance_by_key(&process_id, Some(params)) {
                 Ok(res) => {
                     info!("res={:?}", res);

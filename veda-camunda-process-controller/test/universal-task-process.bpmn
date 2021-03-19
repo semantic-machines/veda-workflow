@@ -41,6 +41,7 @@
         <camunda:in source="description" target="description" />
         <camunda:out source="takenDecision" target="takenDecision" />
         <camunda:in sourceExpression="${ &#39;v-wf:DecisionRedirect, v-wf:DecisionAchieved&#39; }" target="possibleDecision" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0663m9t</bpmn:incoming>
       <bpmn:incoming>Flow_0hi0jnp</bpmn:incoming>
@@ -79,6 +80,7 @@
         <camunda:in sourceExpression="${&#39;Ознакомиться с результатом&#39;}" target="label" />
         <camunda:in sourceExpression="${ &#39;v-wf:DecisionConfirm, v-wf:DecisionRemake&#39; }" target="possibleDecision" />
         <camunda:out source="takenDecision" target="takenDecision" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1joh4d9</bpmn:incoming>
       <bpmn:outgoing>Flow_0gx0wi9</bpmn:outgoing>
@@ -193,6 +195,9 @@ controller</bpmn:text>
           <dc:Bounds x="823" y="410" width="63" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ooe4y3_di" bpmnElement="Activity_0ooe4y3">
+        <dc:Bounds x="745" y="530" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ptjlrc_di" bpmnElement="Activity_0rcuowe">
         <dc:Bounds x="745" y="230" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -202,14 +207,11 @@ controller</bpmn:text>
           <dc:Bounds x="770" y="76" width="50" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_12h3gyq_di" bpmnElement="TextAnnotation_12h3gyq">
-        <dc:Bounds x="120" y="160" width="99.99274099883856" height="123.98373983739837" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ooe4y3_di" bpmnElement="Activity_0ooe4y3">
-        <dc:Bounds x="745" y="530" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1lmfaph_di" bpmnElement="Activity_1lmfaph">
         <dc:Bounds x="530" y="90" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_12h3gyq_di" bpmnElement="TextAnnotation_12h3gyq">
+        <dc:Bounds x="120" y="160" width="99.99274099883856" height="123.98373983739837" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_03t3ay3_di" bpmnElement="Association_03t3ay3">
         <di:waypoint x="170" y="399" />

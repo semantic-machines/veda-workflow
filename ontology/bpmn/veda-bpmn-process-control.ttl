@@ -87,6 +87,14 @@ bpmn:taskId
   rdfs:range xsd:string ;
 .
 
+bpmn:businessKey
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Ключ"@ru ;
+  rdfs:label "Business key"@en ;
+  rdfs:domain bpmn:DecisionForm ;
+  rdfs:range rdfs:Resource ;
+.
+
 # ------------------------------------------------------------
 
 bpmn:ProcessInstanceRequest

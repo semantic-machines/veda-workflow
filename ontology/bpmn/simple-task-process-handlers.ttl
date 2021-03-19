@@ -100,6 +100,7 @@ bpmn:AssignmentHandler
  * event = task event
  * taskId = task id
  * processInstanceId = process instance id
+ * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = task element type
  * elementId = execution element id
@@ -125,6 +126,7 @@ userTask['rdfs:label'] = variables.label.value;
 userTask['v-s:description'] = variables.description.value;
 userTask['bpmn:taskId'] = task.id;
 userTask['bpmn:processInstanceId'] = task.processInstanceId;
+userTask['bpmn:businessKey'] = businessKey;
 userTask['v-wf:possibleDecisionClass'] = variables.possibleDecision.value.replace(/\\s+/g, '').split(',');
 userTask['v-s:creator'] = 'cfg:VedaSystem';
 userTask['v-wf:from'] = from;
@@ -150,6 +152,7 @@ bpmn:TaskDeletionHandler
  * event = task event
  * taskId = task id
  * processInstanceId = process instance id
+ * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = task element type
  * elementId = execution element id
@@ -187,6 +190,7 @@ bpmn:ProcessInstanceStartHandler
  * event = execution event
  * executionId = execution id
  * processInstanceId = process instance id
+ * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = execution element type
  * elementId = execution element id
@@ -249,6 +253,7 @@ bpmn:ProcessInstanceEndHandler
  * event = execution event
  * executionId = execution id
  * processInstanceId = process instance id
+ * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = execution element type
  * elementId = execution element id

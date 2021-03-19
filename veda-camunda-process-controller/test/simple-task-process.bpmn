@@ -18,6 +18,7 @@
         <camunda:in source="description" target="description" />
         <camunda:in source="controller" target="controller" />
         <camunda:in source="dateTo" target="dateTo" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_14g0e4i</bpmn:incoming>
       <bpmn:outgoing>Flow_1e8ugrn</bpmn:outgoing>
