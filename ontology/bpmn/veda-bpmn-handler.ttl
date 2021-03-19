@@ -85,6 +85,14 @@ bpmn:triggerByElementId
   rdfs:range xsd:string ;
 .
 
+bpmn:fetchEventData
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain bpmn:EventHandler ;
+  rdfs:label "Получить данные события"@ru ;
+  rdfs:label "Fetch event data"@en ;
+  rdfs:range xsd:boolean ;
+.
+
 # ------------------------------------------------------------
 
 bpmn:TopicHandler
