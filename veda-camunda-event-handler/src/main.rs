@@ -209,10 +209,10 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             session_data.g_key2attr.insert("$elementType".to_owned(), qel.element_type.to_owned());
             session_data.g_key2attr.insert("$elementId".to_owned(), qel.element_id.to_owned());
 
-            if is_fetch_event_data {
-                if qel.event_type == "UserTaskEvent" {
-                    session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
+            if qel.event_type == "UserTaskEvent" {
+                session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
 
+                if is_fetch_event_data {
                     thread::sleep(REST_TIMEOUT);
 
                     match ctx.camunda_client.task_api().get_task(&qel.id) {
@@ -232,9 +232,11 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                             error!("failed to read variables {:?}", e);
                         }
                     }
-                } else if qel.event_type == "ExecutionEvent" {
-                    session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
+                }
+            } else if qel.event_type == "ExecutionEvent" {
+                session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
 
+                if is_fetch_event_data {
                     thread::sleep(REST_TIMEOUT);
 
                     match ctx.camunda_client.execution_api().get_execution(&qel.id) {
