@@ -23,7 +23,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
 
             let mut vars = HashMap::new();
             let mut var = VariableValueDto::new();
-            var.value = Some(json!(start_form.get_obj().as_json().to_string().to_owned()));
+            var.value = Some(json!(start_form.get_obj().as_json().to_string()));
             var._type = Some("json".to_owned());
             vars.insert("startForm".to_owned(), var);
 

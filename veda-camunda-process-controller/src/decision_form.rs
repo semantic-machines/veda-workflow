@@ -15,7 +15,7 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
             let mut var = VariableValueDto::new();
             if let Some(decision) = module.get_individual(&decision_id, &mut Individual::default()) {
                 decision.parse_all();
-                var.value = Some(json!(decision.get_obj().as_json().to_string().to_owned()));
+                var.value = Some(json!(decision.get_obj().as_json().to_string()));
                 var._type = Some("json".to_owned());
                 vars.insert("takenDecision".to_owned(), var);
                 let mut params = CompleteTaskDto::new();

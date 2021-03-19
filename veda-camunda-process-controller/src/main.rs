@@ -36,7 +36,7 @@ fn main() -> Result<(), i32> {
     listen_queue()
 }
 
-fn listen_queue<'a>() -> Result<(), i32> {
+fn listen_queue() -> Result<(), i32> {
     let mut module = Module::default();
     let systicket;
     if let Ok(t) = module.get_sys_ticket_id() {

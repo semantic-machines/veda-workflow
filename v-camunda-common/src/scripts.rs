@@ -240,8 +240,8 @@ pub fn execute_js_and_return_data(session_data: CallbackSharedData, script_id: &
             info!("fail exec event script : {}, result={:?}", script_id, res);
             return Err(PrepareError::Fatal);
         }
-        return Ok(true);
+        Ok(true)
     } else {
-        return Ok(false);
+        Ok(false)
     }
 }

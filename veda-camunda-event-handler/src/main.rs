@@ -27,7 +27,7 @@ const REST_TIMEOUT: time::Duration = time::Duration::from_millis(1000);
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-USER-TASK");
-    thread::spawn(move || inproc_storage_manager());
+    thread::spawn(move || inproc_storage_manager);
 
     let mut js_runtime = JsRuntime::new();
     listen_queue(&mut js_runtime)
@@ -145,42 +145,30 @@ pub struct QueueElement {
 
 fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
-        let (event_type, event, id, process_instance_id, process_definition_key, element_type, element_id) =
-            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{}", String, String, String, String, String, String, String);
-
-        if event_type.is_none()
-            || event.is_none()
-            || id.is_none()
-            || process_instance_id.is_none()
-            || process_definition_key.is_none()
-            || element_type.is_none()
-            || element_id.is_none()
+        if let (Some(event_type), Some(event), Some(id), Some(process_instance_id), Some(process_definition_key), Some(element_type), Some(element_id)) =
+            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{}", String, String, String, String, String, String, String)
         {
-            error!("failed to parse queue element, data={:?}", el_str);
-            return Ok(true);
-        } else {
-            let event_type = event_type.unwrap();
             let qel = if event_type == "UserTaskEvent" {
                 QueueElement {
                     rtype: "bpmn:UserTaskHandler".to_owned(),
                     event_type,
-                    event: event.unwrap(),
-                    id: id.unwrap(),
-                    process_instance_id: process_instance_id.unwrap(),
-                    process_definition_key: process_definition_key.unwrap(),
-                    element_type: element_type.unwrap(),
-                    element_id: element_id.unwrap(),
+                    event,
+                    id,
+                    process_instance_id,
+                    process_definition_key,
+                    element_type,
+                    element_id,
                 }
             } else if event_type == "ExecutionEvent" {
                 QueueElement {
                     rtype: "bpmn:ExecutionHandler".to_owned(),
                     event_type,
-                    event: event.unwrap(),
-                    id: id.unwrap(),
-                    process_instance_id: process_instance_id.unwrap(),
-                    process_definition_key: process_definition_key.unwrap(),
-                    element_type: element_type.unwrap(),
-                    element_id: element_id.unwrap(),
+                    event,
+                    id,
+                    process_instance_id,
+                    process_definition_key,
+                    element_type,
+                    element_id,
                 }
             } else {
                 QueueElement {
@@ -271,6 +259,9 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     return Err(e);
                 }
             }
+        } else {
+            error!("failed to parse queue element, data={:?}", el_str);
+            return Ok(true);
         }
     } else {
         error!("failed to parse queue element to utf8, data={:?}", queue_element.data);
