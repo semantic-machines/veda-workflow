@@ -232,23 +232,21 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
 
                 thread::sleep(REST_TIMEOUT);
 
-                if qel.event != "end" {
-                    match ctx.camunda_client.execution_api().get_execution(&qel.id) {
-                        Ok(p) => {
-                            session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
-                        }
-                        Err(e) => {
-                            error!("failed to read execution {:?}", e);
-                        }
+                match ctx.camunda_client.execution_api().get_execution(&qel.id) {
+                    Ok(p) => {
+                        session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
                     }
+                    Err(e) => {
+                        error!("failed to read execution {:?}", e);
+                    }
+                }
 
-                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
-                        Ok(v) => {
-                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
-                        }
-                        Err(e) => {
-                            error!("failed to read variables {:?}", e);
-                        }
+                match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
+                    Ok(v) => {
+                        session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                    }
+                    Err(e) => {
+                        error!("failed to read variables {:?}", e);
                     }
                 }
             }
