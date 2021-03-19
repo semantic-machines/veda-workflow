@@ -184,11 +184,15 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             };
 
             let mut is_found_script = false;
+            let mut is_fetch_event_data = false;
+
             for script_id in ctx.workplace.scripts_order.iter() {
                 if let Some(script) = ctx.workplace.scripts.get(script_id) {
                     if check_filters(script, &qel) {
+                        if script.context.fetch_event_data {
+                            is_fetch_event_data = true;
+                        }
                         is_found_script = true;
-                        break;
                     }
                 }
             }
@@ -205,48 +209,50 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             session_data.g_key2attr.insert("$elementType".to_owned(), qel.element_type.to_owned());
             session_data.g_key2attr.insert("$elementId".to_owned(), qel.element_id.to_owned());
 
-            if qel.event_type == "UserTaskEvent" {
-                session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
+            if is_fetch_event_data {
+                if qel.event_type == "UserTaskEvent" {
+                    session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
 
-                thread::sleep(REST_TIMEOUT);
+                    thread::sleep(REST_TIMEOUT);
 
-                match ctx.camunda_client.task_api().get_task(&qel.id) {
-                    Ok(v) => {
-                        session_data.g_key2attr.insert("$task".to_owned(), json!(v).to_string());
+                    match ctx.camunda_client.task_api().get_task(&qel.id) {
+                        Ok(v) => {
+                            session_data.g_key2attr.insert("$task".to_owned(), json!(v).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read task {:?}", e);
+                        }
                     }
-                    Err(e) => {
-                        error!("failed to read task {:?}", e);
-                    }
-                }
 
-                match ctx.camunda_client.task_api().get_variables(&qel.id, None, Some(false)) {
-                    Ok(v) => {
-                        session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                    match ctx.camunda_client.task_api().get_variables(&qel.id, None, Some(false)) {
+                        Ok(v) => {
+                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read variables {:?}", e);
+                        }
                     }
-                    Err(e) => {
-                        error!("failed to read variables {:?}", e);
-                    }
-                }
-            } else if qel.event_type == "ExecutionEvent" {
-                session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
+                } else if qel.event_type == "ExecutionEvent" {
+                    session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
 
-                thread::sleep(REST_TIMEOUT);
+                    thread::sleep(REST_TIMEOUT);
 
-                match ctx.camunda_client.execution_api().get_execution(&qel.id) {
-                    Ok(p) => {
-                        session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
+                    match ctx.camunda_client.execution_api().get_execution(&qel.id) {
+                        Ok(p) => {
+                            session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read execution {:?}", e);
+                        }
                     }
-                    Err(e) => {
-                        error!("failed to read execution {:?}", e);
-                    }
-                }
 
-                match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
-                    Ok(v) => {
-                        session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
-                    }
-                    Err(e) => {
-                        error!("failed to read variables {:?}", e);
+                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
+                        Ok(v) => {
+                            session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
+                        }
+                        Err(e) => {
+                            error!("failed to read variables {:?}", e);
+                        }
                     }
                 }
             }

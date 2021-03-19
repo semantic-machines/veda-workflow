@@ -24,6 +24,7 @@ pub struct ScriptInfoContext {
     pub trigger_by_element_type: Option<HashVec<String>>,
     pub trigger_by_element_id: Option<HashVec<String>>,
     pub script_type: HashVec<String>,
+    pub fetch_event_data: bool
 }
 
 impl Default for ScriptInfoContext {
@@ -33,7 +34,8 @@ impl Default for ScriptInfoContext {
             trigger_by_process_id: None,
             trigger_by_element_type: None,
             trigger_by_element_id: None,
-            script_type: Default::default()
+            script_type: Default::default(),
+            fetch_event_data: false
         }
     }
 }
@@ -140,6 +142,10 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
 
         if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementId") {
             scr_inf.context.trigger_by_element_id = Some (HashVec::new(h));
+        }
+
+        if let Some (h) = ev_indv.get_first_bool("bpmn:fetchEventData") {
+            scr_inf.context.fetch_event_data = h;
         }
 
         scr_inf.context.script_type = HashVec::new(ev_indv.get_literals("rdf:type").unwrap_or_default());
