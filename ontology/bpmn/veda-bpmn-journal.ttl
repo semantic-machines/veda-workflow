@@ -1,0 +1,88 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+<http://semantic-machines.com/veda/veda-bpmn-journal>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+# --------------------------------------------------------
+
+bpmn:ProcessStarted
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:JournalRecord ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Запущен процесс"@ru ;
+  rdfs:label "Process was started"@en ;
+  v-ui:hasTemplate bpmn:ProcessStartedTemplate;
+.
+
+bpmn:ProcessEnded
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:JournalRecord ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Завершен процесс"@ru ;
+  rdfs:label "Process ended"@en ;
+  v-ui:hasTemplate bpmn:ProcessEndedTemplate;
+.
+
+bpmn:ProcessStartedTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон записи журнала 'bpmn:ProcessStarted'"@ru ;
+  rdfs:label "'bpmn:ProcessStarted' journal record template"@en ;
+  v-ui:template """
+<div class="journal-record">
+  <hr class="margin-sm">
+  <div class="row">
+    <div class="col-md-2 col-sm-3 event-type">
+      <strong about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></strong>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc" rel="bpmn:hasStartForm">
+      <div>
+        <span about="@" property="bpmn:startProcessId"></span>,
+        <span about="bpmn:StartForm" data-template="v-ui:LabelTemplate"></span>:
+        <span about="@" data-template="v-ui:LabelLinkTemplate"></span>,
+        <span about="v-s:creator" data-template="v-ui:LabelTemplate"></span>:
+        <span about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></span>
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+  <div class="sub-journal" rel="v-s:childRecord"></div>
+</div>
+  """ ;
+.
+
+bpmn:ProcessEndedTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон записи журнала 'bpmn:ProcessEndedTemplate'"@ru ;
+  rdfs:label "'bpmn:ProcessEndedTemplate' journal record template"@en ;
+  v-ui:template """
+<div class="journal-record">
+  <hr class="margin-sm">
+  <div class="row">
+    <div class="col-md-2 col-sm-3 event-type">
+      <span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc">
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+</div>
+  """ ;
+.

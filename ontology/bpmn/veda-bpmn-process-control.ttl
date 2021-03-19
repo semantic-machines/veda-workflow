@@ -124,23 +124,3 @@ bpmn:ProcessInstanceEventRequest
   rdfs:label "Запрос вызова события в экземпляре процесса"@ru ;
   rdfs:label "Process instance event trigger request"@en ;
 .
-
-# --------------------------------------------------------
-
-bpmn:ProcessStarted
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:JournalRecord ;
-  rdfs:isDefinedBy v-wf: ;
-  rdfs:label "Запущен процесс"@ru ;
-  rdfs:label "Process was started"@en ;
-  v-ui:hasTemplate v-ui:ttl;
-.
-
-bpmn:ProcessEnded
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:JournalRecord ;
-  rdfs:isDefinedBy v-wf: ;
-  rdfs:label "Завершен процесс"@ru ;
-  rdfs:label "Process ended"@en ;
-  v-ui:hasTemplate v-ui:ttl;
-.
