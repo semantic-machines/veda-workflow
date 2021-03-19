@@ -11,7 +11,13 @@
     <bpmn:sequenceFlow id="Flow_1e8ugrn" sourceRef="Activity_1nwgw24" targetRef="Event_0m3lrsw" />
     <bpmn:callActivity id="Activity_1nwgw24" name="Запустить процесс исполнения поручения" calledElement="UniversalTaskProcess">
       <bpmn:extensionElements>
-        <camunda:in variables="all" />
+        <camunda:in source="from" target="from" />
+        <camunda:in source="to" target="to" />
+        <camunda:in source="document" target="document" />
+        <camunda:in source="label" target="label" />
+        <camunda:in source="description" target="description" />
+        <camunda:in source="controller" target="controller" />
+        <camunda:in source="dateTo" target="dateTo" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_14g0e4i</bpmn:incoming>
       <bpmn:outgoing>Flow_1e8ugrn</bpmn:outgoing>
@@ -75,6 +81,10 @@ tmp;</camunda:script>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SimpleTaskProcess">
+      <bpmndi:BPMNEdge id="Flow_14g0e4i_di" bpmnElement="Flow_14g0e4i">
+        <di:waypoint x="360" y="117" />
+        <di:waypoint x="440" y="117" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1e8ugrn_di" bpmnElement="Flow_1e8ugrn">
         <di:waypoint x="540" y="117" />
         <di:waypoint x="662" y="117" />
@@ -83,18 +93,14 @@ tmp;</camunda:script>
         <di:waypoint x="188" y="117" />
         <di:waypoint x="260" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14g0e4i_di" bpmnElement="Flow_14g0e4i">
-        <di:waypoint x="360" y="117" />
-        <di:waypoint x="440" y="117" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0m3lrsw_di" bpmnElement="Event_0m3lrsw">
         <dc:Bounds x="662" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1dvd805_di" bpmnElement="Activity_1nwgw24">
         <dc:Bounds x="440" y="77" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_13ni74a_di" bpmnElement="Activity_13ni74a">
         <dc:Bounds x="260" y="77" width="100" height="80" />
