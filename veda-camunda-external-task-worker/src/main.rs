@@ -28,7 +28,7 @@ fn main() -> Result<(), i32> {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    thread::spawn(move || inproc_storage_manager);
+    thread::spawn(move || inproc_storage_manager());
 
     let mut module = Module::default();
 

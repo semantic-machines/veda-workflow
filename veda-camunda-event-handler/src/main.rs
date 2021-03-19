@@ -27,7 +27,7 @@ const REST_TIMEOUT: time::Duration = time::Duration::from_millis(1000);
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-USER-TASK");
-    thread::spawn(move || inproc_storage_manager);
+    thread::spawn(move || inproc_storage_manager());
 
     let mut js_runtime = JsRuntime::new();
     listen_queue(&mut js_runtime)
