@@ -40,8 +40,20 @@
         <camunda:in source="label" target="label" />
         <camunda:in source="description" target="description" />
         <camunda:out source="takenDecision" target="takenDecision" />
-        <camunda:in sourceExpression="${ &#39;v-wf:DecisionRedirect, v-wf:DecisionAchieved&#39; }" target="possibleDecision" />
+        <camunda:in sourceExpression="${ &#39;v-wf:DecisionRedirect, v-wf:DecisionAchieved&#39; }" target="possibleDecisionClass" />
         <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:inputOutput>
+          <camunda:outputParameter name="takenDecisionClass">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() }</camunda:outputParameter>
+          <camunda:outputParameter name="description">
+            <camunda:script scriptFormat="javascript">var tmp;
+try { 
+  tmp = takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue();
+} catch(e) {
+  tmp = "";
+}
+tmp;</camunda:script>
+          </camunda:outputParameter>
+        </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0663m9t</bpmn:incoming>
       <bpmn:incoming>Flow_0hi0jnp</bpmn:incoming>
@@ -55,10 +67,10 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0rotido" sourceRef="Activity_19xleoo" targetRef="Gateway_00iu739" />
     <bpmn:sequenceFlow id="Flow_1joh4d9" name="Исполнена" sourceRef="Gateway_00iu739" targetRef="Activity_0rcuowe">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() == 'v-wf:DecisionAchieved' }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecisionClass == 'v-wf:DecisionAchieved' }</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0d9kj68" name="Перенаправлена" sourceRef="Gateway_00iu739" targetRef="Activity_0ooe4y3">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() == 'v-wf:DecisionRedirect' }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecisionClass == 'v-wf:DecisionRedirect' }</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:task id="Activity_0ooe4y3" name="Установить нового исполнителя">
       <bpmn:extensionElements>
@@ -76,11 +88,23 @@
         <camunda:in source="document" target="document" />
         <camunda:in source="to" target="from" />
         <camunda:in source="controller" target="to" />
-        <camunda:in sourceExpression="${ takenDecision.jsonPath(&#34;$.rdfs:comment[0].data&#34;).stringValue() }" target="description" />
+        <camunda:in source="description" target="description" />
         <camunda:in sourceExpression="${&#39;Ознакомиться с результатом&#39;}" target="label" />
-        <camunda:in sourceExpression="${ &#39;v-wf:DecisionConfirm, v-wf:DecisionRemake&#39; }" target="possibleDecision" />
+        <camunda:in sourceExpression="${ &#39;v-wf:DecisionConfirm, v-wf:DecisionRemake&#39; }" target="possibleDecisionClass" />
         <camunda:out source="takenDecision" target="takenDecision" />
         <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:inputOutput>
+          <camunda:outputParameter name="takenDecisionClass">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() }</camunda:outputParameter>
+          <camunda:outputParameter name="description">
+            <camunda:script scriptFormat="javascript">var tmp;
+try { 
+  tmp = takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue();
+} catch(e) {
+  tmp = "";
+}
+tmp;</camunda:script>
+          </camunda:outputParameter>
+        </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1joh4d9</bpmn:incoming>
       <bpmn:outgoing>Flow_0gx0wi9</bpmn:outgoing>
@@ -92,16 +116,15 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0gx0wi9" sourceRef="Activity_0rcuowe" targetRef="Gateway_00qgthb" />
     <bpmn:sequenceFlow id="Flow_1mns35f" sourceRef="Gateway_00qgthb" targetRef="Activity_1lmfaph">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() == 'v-wf:DecisionRemake' }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecisionClass == 'v-wf:DecisionRemake' }</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1vz9ohi" sourceRef="Gateway_00qgthb" targetRef="Activity_136gszx">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() == 'v-wf:DecisionConfirm' }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ takenDecisionClass == 'v-wf:DecisionConfirm' }</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:task id="Activity_1lmfaph" name="Установить название &#39;Доработать&#39;">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:outputParameter name="label">Доработать</camunda:outputParameter>
-          <camunda:outputParameter name="description">${ takenDecision.jsonPath("$.rdfs:comment[0].data").stringValue() }</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1mns35f</bpmn:incoming>
