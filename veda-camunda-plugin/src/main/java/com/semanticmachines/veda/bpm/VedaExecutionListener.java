@@ -2,6 +2,7 @@ package com.semanticmachines.veda.bpm;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.camunda.bpm.model.xml.type.ModelElementType;
@@ -55,8 +56,17 @@ public class VedaExecutionListener implements ExecutionListener {
       elementId = execution.getCurrentActivityId();
     }
     String processInstanceId = execution.getProcessInstanceId();
+    
+    ExecutionEntity executionEntity = (ExecutionEntity) execution;
+    ExecutionEntity processInstance = executionEntity.getProcessInstance();
+    ExecutionEntity superExecution = processInstance.getSuperExecution();
+    String superProcessInstanceId = null;
+    if(superExecution != null) {
+      superProcessInstanceId = superExecution.getProcessInstanceId();
+    }
+    
     String businessKey = execution.getBusinessKey();
-    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processInstanceId, businessKey, processDefinitionKey, elementType, elementId);
+    String msg = "ExecutionEvent:" + String.join(",", event, executionId, processInstanceId, superProcessInstanceId, businessKey, processDefinitionKey, elementType, elementId);
     queueWriter.queue.push(msg);
     LOGGER.info("queue: " + msg);
   }

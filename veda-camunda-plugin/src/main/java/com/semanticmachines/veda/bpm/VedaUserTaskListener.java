@@ -3,6 +3,8 @@ package com.semanticmachines.veda.bpm;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
+
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +42,16 @@ public class VedaUserTaskListener implements TaskListener {
     String processInstanceId = delegateTask.getProcessInstanceId();
     DelegateExecution execution = delegateTask.getExecution();
     String businessKey = execution.getBusinessKey();
-    String msg = "UserTaskEvent:" + String.join(",", event, taskId, processInstanceId, businessKey, processDefinitionKey, elementType, elementId);
+
+    ExecutionEntity executionEntity = (ExecutionEntity) execution;
+    ExecutionEntity processInstance = executionEntity.getProcessInstance();
+    ExecutionEntity superExecution = processInstance.getSuperExecution();
+    String superProcessInstanceId = null;
+    if(superExecution != null) {
+      superProcessInstanceId = superExecution.getProcessInstanceId();
+    }
+    
+    String msg = "UserTaskEvent:" + String.join(",", event, taskId, processInstanceId, superProcessInstanceId, businessKey, processDefinitionKey, elementType, elementId);
     queueWriter.queue.push(msg);
     LOGGER.info("queue: " + msg);
   }

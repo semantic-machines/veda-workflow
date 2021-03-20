@@ -100,6 +100,7 @@ bpmn:AssignmentHandler
  * event = task event
  * taskId = task id
  * processInstanceId = process instance id
+ * superProcessInstanceId = super process instance id
  * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = task element type
@@ -152,6 +153,7 @@ bpmn:TaskDeletionHandler
  * event = task event
  * taskId = task id
  * processInstanceId = process instance id
+ * superProcessInstanceId = super process instance id
  * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = task element type
@@ -190,6 +192,7 @@ bpmn:ProcessInstanceStartHandler
  * event = execution event
  * executionId = execution id
  * processInstanceId = process instance id
+ * superProcessInstanceId = super process instance id
  * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = execution element type
@@ -198,7 +201,7 @@ bpmn:ProcessInstanceStartHandler
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId);
+console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId);
 
 if (variables && variables.startForm) {
   const startForm = JSON.parse(variables.startForm.value);
@@ -253,6 +256,7 @@ bpmn:ProcessInstanceEndHandler
  * event = execution event
  * executionId = execution id
  * processInstanceId = process instance id
+ * superProcessInstanceId = super process instance id
  * businessKey = process instance business key
  * processDefinitionKey = process definition id
  * elementType = execution element type
@@ -261,7 +265,7 @@ bpmn:ProcessInstanceEndHandler
  * variables = camunda execution variables object
  */
 
-console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId);
+console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId);
 
 const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
 const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('process ended' + processInstanceId);

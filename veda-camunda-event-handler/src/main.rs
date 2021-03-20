@@ -74,6 +74,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
                 ("event", "string"),
                 ("taskId", "string"),
                 ("processInstanceId", "string"),
+                ("superProcessInstanceId", "string"),
                 ("businessKey", "string"),
                 ("processDefinitionKey", "string"),
                 ("elementType", "string"),
@@ -91,6 +92,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
                 ("event", "string"),
                 ("executionId", "string"),
                 ("processInstanceId", "string"),
+                ("superProcessInstanceId", "string"),
                 ("businessKey", "string"),
                 ("processDefinitionKey", "string"),
                 ("elementType", "string"),
@@ -140,6 +142,7 @@ pub struct QueueElement {
     event: String,
     id: String,
     process_instance_id: String,
+    super_process_instance_id: String,
     business_key: String,
     process_definition_key: String,
     element_type: String,
@@ -148,8 +151,8 @@ pub struct QueueElement {
 
 fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
-        if let (Some(event_type), Some(event), Some(id), Some(process_instance_id), Some(business_key), Some(process_definition_key), Some(element_type), Some(element_id)) =
-            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String)
+        if let (Some(event_type), Some(event), Some(id), Some(process_instance_id),Some(super_process_instance_id), Some(business_key), Some(process_definition_key), Some(element_type), Some(element_id)) =
+            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String, String)
         {
             let qel = if event_type == "UserTaskEvent" {
                 QueueElement {
@@ -158,6 +161,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     event,
                     id,
                     process_instance_id,
+                    super_process_instance_id,
                     business_key,
                     process_definition_key,
                     element_type,
@@ -170,6 +174,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     event,
                     id,
                     process_instance_id,
+                    super_process_instance_id,
                     business_key,
                     process_definition_key,
                     element_type,
@@ -182,6 +187,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
                     event: "".to_string(),
                     id: "".to_string(),
                     process_instance_id: "".to_string(),
+                    super_process_instance_id: "".to_string(),
                     business_key: "".to_string(),
                     process_definition_key: "".to_string(),
                     element_type: "".to_string(),
@@ -210,6 +216,7 @@ fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_elemen
             let mut session_data = CallbackSharedData::default();
             session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
             session_data.g_key2attr.insert("$processInstanceId".to_owned(), qel.process_instance_id.to_owned());
+            session_data.g_key2attr.insert("$superProcessInstanceId".to_owned(), qel.super_process_instance_id.to_owned());
             session_data.g_key2attr.insert("$businessKey".to_owned(), qel.business_key.to_owned());
             session_data.g_key2attr.insert("$processDefinitionKey".to_owned(), qel.process_definition_key.to_owned());
             session_data.g_key2attr.insert("$event".to_owned(), qel.event.to_owned());
