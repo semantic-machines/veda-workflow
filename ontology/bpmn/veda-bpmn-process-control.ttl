@@ -38,11 +38,12 @@ bpmn:StartForm
   rdfs:label "Start form"@en ;
 .
 
-bpmn:startProcessId
+bpmn:processDefinitionKey
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Запустить процесс"@ru ;
-  rdfs:label "Start process"@en ;
+  rdfs:label "Ключ определения процесса"@ru ;
+  rdfs:label "Process definition key"@en ;
   rdfs:domain bpmn:StartForm ;
+  rdfs:domain v-s:JournalRecord ;
   rdfs:range xsd:string ;
 .
 
@@ -59,14 +60,6 @@ bpmn:hasStatus
   rdfs:label "Status"@en ;
   rdfs:domain bpmn:StartForm ;
   rdfs:range bpmn:Status ;
-.
-
-bpmn:hasStartForm
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Статус"@ru ;
-  rdfs:label "Status"@en ;
-  rdfs:domain v-s:JournalRecord ;
-  rdfs:range bpmn:StartForm ;
 .
 
 # ------------------------------------------------------------

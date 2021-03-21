@@ -45,7 +45,6 @@ if (object && property && typeof value !== 'undefined') {
   individual.set(property, value);
   individual.save();
 }
-
   """ ;
 .
 
@@ -80,7 +79,6 @@ console.log(subject, object, permission);
 if (subject && object && permission.length) {
   veda.Util.addRight(ticket, subject, object, permission);
 }
-
   """ ;
 .
 
@@ -136,6 +134,13 @@ userTask['v-wf:isCompleted'] = false ;
 userTask['v-wf:onDocument'] = variables.document.value ;
 userTask.save();
 
+const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
+const task_created_record = {
+  '@': 'd:' + veda.Util.Sha256.hash('task created' + taskId),
+  'rdf:type': veda.Util.newUri('bpmn:TaskCreated'),
+  'bpmn:hasDecisionForm': veda.Util.newUri(userTask.id),
+};
+veda.BPMN.addToJournal(process_started_record_id, task_created_record);
   """ ;
 .
 
@@ -173,6 +178,12 @@ veda.Backend.query(veda.ticket, queryString).then(queryResult => {
   });
 });
 
+const task_created_record_id = 'd:' + veda.Util.Sha256.hash('task created' + taskId);
+const task_deleted_record = {
+  '@': 'd:' + veda.Util.Sha256.hash('task deleted' + taskId),
+  'rdf:type': veda.Util.newUri('bpmn:TaskDeleted'),
+};
+veda.BPMN.addToJournal(task_created_record_id, task_deleted_record);
   """ ;
 .
 
@@ -203,41 +214,30 @@ bpmn:ProcessInstanceStartHandler
 
 console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId);
 
-if (variables && variables.startForm) {
+if (variables && variables.startForm && superProcessInstanceId === 'null') {
   const startForm = JSON.parse(variables.startForm.value);
   if (veda.Util.hasValue(startForm, 'v-wf:onDocument')) {
     const journal_uri = startForm['v-wf:onDocument'][0].data + 'j';
-    const process_started_record_uri = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
+    const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
     const process_started_record = {
-      '@': process_started_record_uri,
+      '@': process_started_record_id,
       'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
-      'v-s:created': veda.Util.newDate(new Date()),
-      'bpmn:hasStartForm': veda.Util.newUri(startForm['@'])
+      'bpmn:hasStartForm': veda.Util.newUri(startForm['@']),
+      'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
+      'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
     };
-    veda.Backend.get_individual(veda.ticket, journal_uri)
-      .catch(err => {
-        console.error(`Journal not found: ${journal_uri}`);
-        throw err;
-      })
-      .then(() => {
-        return veda.Backend.put_individual(veda.ticket, process_started_record)
-      })
-      .catch(err => {
-        console.error(`Failed to create 'bpmn:ProcessStarted' record`);
-        throw err;
-      })
-      .then(() => {
-        const add = {
-          '@': journal_uri,
-          'v-s:childRecord': veda.Util.newUri(process_started_record_uri),
-        }
-        return veda.Backend.add_to_individual(veda.ticket, add)
-      })
-      .catch(err => {
-        console.error(`Failed to add 'bpmn:ProcessStarted' record ${process_started_record_uri} to journal ${journal_uri}`);
-        throw err;
-      })
+    veda.BPMN.addToJournal(journal_uri, process_started_record);
   }
+} else if (superProcessInstanceId !== 'null') {
+  const super_process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + superProcessInstanceId);
+  const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
+  const process_started_record = {
+    '@': process_started_record_id,
+    'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
+    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
+    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
+  };
+  veda.BPMN.addToJournal(super_process_started_record_id, process_started_record);
 }
   """ ;
 .
@@ -272,30 +272,7 @@ const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('process ended' + p
 const process_ended_record = {
   '@': process_ended_record_id,
   'rdf:type': veda.Util.newUri('bpmn:ProcessEnded'),
-  'v-s:created': veda.Util.newDate(new Date()),
 };
-veda.Backend.get_individual(veda.ticket, process_started_record_id)
-  .catch(err => {
-    console.log(`'bpmn:ProcessStarted' record not found: ${process_started_record_id}`);
-    throw err;
-  })
-  .then((process_started_record) => {
-    veda.Backend.put_individual(veda.ticket, process_ended_record)
-      .catch(err => {
-        console.error(`Failed to create 'bpmn:ProcessEnded' record`);
-        throw err;
-      })
-      .then(() => {
-        const add = {
-          '@': process_started_record_id,
-          'v-s:childRecord': veda.Util.newUri(process_ended_record_id),
-        }
-        return veda.Backend.add_to_individual(veda.ticket, add)
-      })
-      .catch(err => {
-        console.error(`Failed to add 'bpmn:ProcessEnded' record ${process_ended_record['@']} to 'bpmn:ProcessStarted' record' ${process_started_record_id}`);
-        throw err;
-      })
-  })
+veda.BPMN.addToJournal(process_started_record_id, process_ended_record);
   """ ;
 .

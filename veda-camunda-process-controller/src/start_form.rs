@@ -12,10 +12,9 @@ use v_module::v_onto::individual::Individual;
 
 pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module: &mut Module, _signal: &str) -> Result<(), Box<dyn Error>> {
     if start_form.any_exists("bpmn:hasStatus", &["bpmn:ToBeStarted"]) {
-        if let Some(process_id) = start_form.get_first_literal("bpmn:startProcessId") {
+        if let Some(process_id) = start_form.get_first_literal("bpmn:processDefinitionKey") {
             //let start_form_id = start_form.get_id().to_owned();
             start_form.parse_all();
-            start_form.remove("bpmn:startProcess");
             start_form.remove("rdfs:isDefinedBy");
             start_form.remove("bpmn:hasStatus");
 

@@ -19,6 +19,22 @@
 
 # --------------------------------------------------------
 
+bpmn:hasStartForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Статус"@ru ;
+  rdfs:label "Status"@en ;
+  rdfs:domain v-s:JournalRecord ;
+  rdfs:range bpmn:StartForm ;
+.
+
+bpmn:hasDecisionForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Задача"@ru ;
+  rdfs:label "Task"@en ;
+  rdfs:domain v-s:JournalRecord ;
+  rdfs:range bpmn:DecisionForm ;
+.
+
 bpmn:ProcessStarted
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:JournalRecord ;
@@ -37,6 +53,24 @@ bpmn:ProcessEnded
   v-ui:hasTemplate bpmn:ProcessEndedTemplate;
 .
 
+bpmn:TaskCreated
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:JournalRecord ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Создана задача"@ru ;
+  rdfs:label "Task created"@en ;
+  v-ui:hasTemplate bpmn:TaskCreatedTemplate;
+.
+
+bpmn:TaskDeleted
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:JournalRecord ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Удалена задача"@ru ;
+  rdfs:label "Task deleted"@en ;
+  v-ui:hasTemplate bpmn:TaskDeletedTemplate;
+.
+
 bpmn:ProcessStartedTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон записи журнала 'bpmn:ProcessStarted'"@ru ;
@@ -48,14 +82,16 @@ bpmn:ProcessStartedTemplate
     <div class="col-md-2 col-sm-3 event-type">
       <strong about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></strong>
     </div>
-    <div class="col-md-8 col-sm-6 event-desc" rel="bpmn:hasStartForm">
-      <div>
-        <span about="@" property="bpmn:startProcessId"></span>,
-        <span about="bpmn:StartForm" data-template="v-ui:LabelTemplate"></span>:
-        <span about="@" data-template="v-ui:LabelLinkTemplate"></span>,
-        <span about="v-s:creator" data-template="v-ui:LabelTemplate"></span>:
-        <span about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></span>
-      </div>
+    <div class="col-md-8 col-sm-6 event-desc">
+      <div about="@" property="bpmn:processDefinitionKey"></div>
+      <span about="@" rel="bpmn:hasStartForm">
+        <span>
+          <span about="bpmn:StartForm" data-template="v-ui:LabelTemplate"></span>:
+          <span about="@" data-template="v-ui:LabelLinkTemplate"></span>,
+          <span about="v-s:creator" data-template="v-ui:LabelTemplate"></span>:
+          <span about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></span>
+        </span>
+      </span>
     </div>
     <div class="col-md-2 col-sm-3 event-date text-right">
       <span about="@" property="v-s:created"></span>
@@ -68,12 +104,78 @@ bpmn:ProcessStartedTemplate
 
 bpmn:ProcessEndedTemplate
   rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон записи журнала 'bpmn:ProcessEndedTemplate'"@ru ;
-  rdfs:label "'bpmn:ProcessEndedTemplate' journal record template"@en ;
+  rdfs:label "Шаблон записи журнала 'bpmn:ProcessEnded'"@ru ;
+  rdfs:label "'bpmn:ProcessEnded' journal record template"@en ;
   v-ui:template """
-<div class="journal-record">
+<div class="journal-record margin-md">
   <hr class="margin-sm">
-  <div class="row">
+  <div class="row margin-sm">
+    <div class="col-md-2 col-sm-3 event-type">
+      <span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc">
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+</div>
+  """ ;
+.
+
+bpmn:TaskCreatedTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон записи журнала 'bpmn:TaskCreated'"@ru ;
+  rdfs:label "'bpmn:TaskCreated' journal record template"@en ;
+  v-ui:template """
+<div class="journal-record margin-md">
+  <hr class="margin-sm">
+  <div class="row margin-sm">
+    <div class="col-md-2 col-sm-3 event-type">
+      <span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc" rel="bpmn:hasDecisionForm">
+      <div class="row">
+        <div class="col-sm-6 col-xs-12">
+          <strong about="@" data-template="v-ui:LabelLinkTemplate"></strong>
+          <div>
+            <i about="@" property="v-s:description"></i>
+          </div>
+          <span about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></span>
+        </div>
+        <div class="col-sm-6 col-xs-12" about="@" rel="v-wf:takenDecision">
+          <div>
+            <strong about="@" property="rdfs:label"></strong>
+            <span about="@" rel="v-wf:to">
+              <span>
+                <span>&rarr;</span>
+                <span about="@" data-template="v-ui:LabelTemplate"></span>
+              </span>
+            </span>
+            <div>
+              <i about="@" property="rdfs:comment"></i>
+            </div>
+            <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+</div>
+  """ ;
+.
+
+bpmn:TaskDeletedTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон записи журнала 'bpmn:TaskDeleted'"@ru ;
+  rdfs:label "'bpmn:TaskDeleted' journal record template"@en ;
+  v-ui:template """
+<div class="journal-record margin-md">
+  <hr class="margin-sm">
+  <div class="row margin-sm">
     <div class="col-md-2 col-sm-3 event-type">
       <span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span>
     </div>
