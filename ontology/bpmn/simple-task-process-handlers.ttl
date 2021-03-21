@@ -134,7 +134,7 @@ userTask['v-wf:isCompleted'] = false ;
 userTask['v-wf:onDocument'] = variables.document.value ;
 userTask.save();
 
-const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
+const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + superProcessInstanceId);
 const task_created_record = {
   '@': 'd:' + veda.Util.Sha256.hash('task created' + taskId),
   'rdf:type': veda.Util.newUri('bpmn:TaskCreated'),
@@ -212,6 +212,8 @@ bpmn:ProcessInstanceStartHandler
  * variables = camunda execution variables object
  */
 
+if (processDefinitionKey === 'ElementalTaskProcess') { return; }
+
 console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId);
 
 if (variables && variables.startForm && superProcessInstanceId === 'null') {
@@ -264,6 +266,8 @@ bpmn:ProcessInstanceEndHandler
  * execution = camunda execution object
  * variables = camunda execution variables object
  */
+
+if (processDefinitionKey === 'ElementalTaskProcess') { return; }
 
 console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId);
 

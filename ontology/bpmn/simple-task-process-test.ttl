@@ -31,7 +31,7 @@ td:simple-task-process-start-form1
   v-s:dateTo "2021-03-17T09:41:00Z"^^xsd:dateTime ;
   v-wf:onDocument td:TestDocument ;
   rdfs:label "Исполнить поручение" ;
-  v-s:description "Прошу исполнить поручение!!!" ;
+  v-s:description "Прошу исполнить поручение!" ;
   v-ui:hasTemplate v-ui:ttl;
 .
 
