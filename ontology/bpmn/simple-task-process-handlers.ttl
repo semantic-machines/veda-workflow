@@ -53,31 +53,23 @@ if (object && property && typeof value !== 'undefined') {
 bpmn:SetRightsHandler
   rdf:type bpmn:ExternalTaskHandler ;
   rdfs:label "Обработчик топика 'setRights'" ;
-  bpmn:triggerByTopic "setRights" ;
+  bpmn:triggerByTopic "setRight" ;
   bpmn:script """
 /* Available variables:
  * ticket = superuser ticket
  * task = camunda task JSON
  */
 
-console.log('SET RIGHTS');
+console.log('SET RIGHT');
 
 const subject = task.variables.subject.value;
 const object = task.variables.object.value;
-let permission = task.variables.permission.value;
+let right = task.variables.right.value;
 
-permission = permission.split('').map(char => {
-  return char === 'c' ? 'v-s:canCreate' :
-         char === 'r' ? 'v-s:canRead' :
-         char === 'u' ? 'v-s:canUpdate' :
-         char === 'd' ? 'v-s:canDelete' :
-         undefined;
-}).filter(Boolean);
+console.log(subject, object, right);
 
-console.log(subject, object, permission);
-
-if (subject && object && permission.length) {
-  veda.Util.addRight(ticket, subject, object, permission);
+if (subject && object && right.length) {
+  veda.BPMN.addRight(subject, object, right);
 }
   """ ;
 .
@@ -130,17 +122,24 @@ userTask['v-wf:possibleDecisionClass'] = variables.possibleDecisionClass.value.r
 userTask['v-s:creator'] = 'cfg:VedaSystem';
 userTask['v-wf:from'] = from;
 userTask['v-wf:to'] = to;
-userTask['v-wf:isCompleted'] = false ;
-userTask['v-wf:onDocument'] = variables.document.value ;
+userTask['v-wf:isCompleted'] = false;
+userTask['v-wf:onDocument'] = variables.document.value;
 userTask.save();
 
-const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + superProcessInstanceId);
+// Add task to document group [R]
+veda.BPMN.addToGroup(variables.document.value, userTask.id, 'R');
+
+const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
 const task_created_record = {
   '@': 'd:' + veda.Util.Sha256.hash('task created' + taskId),
   'rdf:type': veda.Util.newUri('bpmn:TaskCreated'),
   'bpmn:hasDecisionForm': veda.Util.newUri(userTask.id),
 };
 veda.BPMN.addToJournal(process_started_record_id, task_created_record);
+
+// Add journal record to parent journal record group [R]
+veda.BPMN.addToGroup(process_started_record_id, task_created_record['@'], 'R');
+
   """ ;
 .
 
@@ -184,6 +183,10 @@ const task_deleted_record = {
   'rdf:type': veda.Util.newUri('bpmn:TaskDeleted'),
 };
 veda.BPMN.addToJournal(task_created_record_id, task_deleted_record);
+
+// Add journal record to parent journal record group [R]
+veda.BPMN.addToGroup(task_created_record_id, task_deleted_record['@'], 'R');
+
   """ ;
 .
 
@@ -212,15 +215,13 @@ bpmn:ProcessInstanceStartHandler
  * variables = camunda execution variables object
  */
 
-if (processDefinitionKey === 'ElementalTaskProcess') { return; }
-
-console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId);
+console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
 
 if (variables && variables.startForm && superProcessInstanceId === 'null') {
   const startForm = JSON.parse(variables.startForm.value);
   if (veda.Util.hasValue(startForm, 'v-wf:onDocument')) {
     const journal_uri = startForm['v-wf:onDocument'][0].data + 'j';
-    const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
+    const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
     const process_started_record = {
       '@': process_started_record_id,
       'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
@@ -229,17 +230,10 @@ if (variables && variables.startForm && superProcessInstanceId === 'null') {
       'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
     };
     veda.BPMN.addToJournal(journal_uri, process_started_record);
+
+    // Add journal record to parent journal record group [R]
+    veda.BPMN.addToGroup(journal_uri, process_started_record['@'], 'R');
   }
-} else if (superProcessInstanceId !== 'null') {
-  const super_process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + superProcessInstanceId);
-  const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
-  const process_started_record = {
-    '@': process_started_record_id,
-    'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
-    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
-    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
-  };
-  veda.BPMN.addToJournal(super_process_started_record_id, process_started_record);
 }
   """ ;
 .
@@ -267,16 +261,21 @@ bpmn:ProcessInstanceEndHandler
  * variables = camunda execution variables object
  */
 
-if (processDefinitionKey === 'ElementalTaskProcess') { return; }
+console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
 
-console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId);
+if (superProcessInstanceId === 'null') {
+  const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
+  const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('business key ended' + businessKey);
+  const process_ended_record = {
+    '@': process_ended_record_id,
+    'rdf:type': veda.Util.newUri('bpmn:ProcessEnded'),
+    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
+    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
+  };
+  veda.BPMN.addToJournal(process_started_record_id, process_ended_record);
 
-const process_started_record_id = 'd:' + veda.Util.Sha256.hash('process started' + processInstanceId);
-const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('process ended' + processInstanceId);
-const process_ended_record = {
-  '@': process_ended_record_id,
-  'rdf:type': veda.Util.newUri('bpmn:ProcessEnded'),
-};
-veda.BPMN.addToJournal(process_started_record_id, process_ended_record);
+  // Add journal record to parent journal record group [R]
+  veda.BPMN.addToGroup(process_started_record_id, process_ended_record['@'], 'R');
+}
   """ ;
 .

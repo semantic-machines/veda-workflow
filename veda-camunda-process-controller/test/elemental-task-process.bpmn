@@ -4,12 +4,12 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_193wt9v</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_0th4w1b" name="Установить права на документ" camunda:type="external" camunda:topic="setRights">
+    <bpmn:serviceTask id="Activity_0th4w1b" name="Установить права на документ" camunda:type="external" camunda:topic="setRight">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="subject">${ to }</camunda:inputParameter>
           <camunda:inputParameter name="object">${ document }</camunda:inputParameter>
-          <camunda:inputParameter name="permission">r</camunda:inputParameter>
+          <camunda:inputParameter name="right">r</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_193wt9v</bpmn:incoming>
