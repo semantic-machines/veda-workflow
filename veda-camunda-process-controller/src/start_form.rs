@@ -5,6 +5,7 @@ use serde_json::json;
 use camunda_client::models::{StartProcessInstanceDto, VariableValueDto};
 use std::collections::HashMap;
 use std::error::Error;
+use uuid::Uuid;
 use v_module::module::Module;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::{DataType, Lang};
@@ -41,7 +42,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
             }
 
             params.variables = Some(vars);
-            params.business_key = Some(start_form.get_id().to_owned());
+            params.business_key = Some(Uuid::new_v4().to_string());
             match ctx.camunda_client.process_definition_api().start_process_instance_by_key(&process_id, Some(params)) {
                 Ok(res) => {
                     info!("res={:?}", res);
