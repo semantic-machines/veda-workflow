@@ -80,7 +80,7 @@ bpmn:AssignmentHandler
   rdf:type bpmn:UserTaskHandler ;
   rdfs:label "Обработчик события 'assignment'" ;
   bpmn:triggerByEvent "create" ;
-#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
 #  bpmn:triggerByElementType "userTask" ;
 #  bpmn:triggerByElementId "userTask_1" ;
   bpmn:fetchEventData true ;
@@ -147,7 +147,7 @@ bpmn:TaskDeletionHandler
   rdf:type bpmn:UserTaskHandler ;
   rdfs:label "Обработчик события 'delete'" ;
   bpmn:triggerByEvent "delete" ;
-#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
 #  bpmn:triggerByElementType "userTask";
 #  bpmn:triggerByElementId "userTask_1";
   bpmn:fetchEventData false ;
@@ -196,7 +196,7 @@ bpmn:ProcessInstanceStartHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события старта экземпляра процесса" ;
   bpmn:triggerByEvent "end" ;
-#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
   bpmn:triggerByElementType "startEvent";
 #  bpmn:triggerByElementId "startEvent";
   bpmn:fetchEventData true ;
@@ -242,7 +242,7 @@ bpmn:ProcessInstanceEndHandler
   rdf:type bpmn:ExecutionHandler ;
   rdfs:label "Обработчик события завершения экземпляра процесса" ;
   bpmn:triggerByEvent "end" ;
-#  bpmn:triggerByProcessId "SimpleTaskProcess" ;
+#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
   bpmn:triggerByElementType "null", "endEvent";
 #  bpmn:triggerByElementId "null";
   bpmn:fetchEventData false ;

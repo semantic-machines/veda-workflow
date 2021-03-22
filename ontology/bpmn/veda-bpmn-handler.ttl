@@ -61,11 +61,11 @@ bpmn:triggerByEvent
   rdfs:range xsd:string ;
 .
 
-bpmn:triggerByProcessId
+bpmn:triggerByProcessDefinitionKey
   rdf:type owl:DatatypeProperty ;
   rdfs:domain bpmn:EventHandler ;
-  rdfs:label "Срабатывать по id процесса"@ru ;
-  rdfs:label "Trigger by process id"@en ;
+  rdfs:label "Срабатывать по ключу определения процесса"@ru ;
+  rdfs:label "Trigger by process definition key"@en ;
   rdfs:range xsd:string ;
 .
 

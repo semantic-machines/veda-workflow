@@ -20,7 +20,7 @@ use v_v8::session_cache::{commit, Transaction};
 
 pub struct ScriptInfoContext {
     pub trigger_by_event: Option<HashVec<String>>,
-    pub trigger_by_process_id: Option<HashVec<String>>,
+    pub trigger_by_process_definition_key: Option<HashVec<String>>,
     pub trigger_by_element_type: Option<HashVec<String>>,
     pub trigger_by_element_id: Option<HashVec<String>>,
     pub script_type: HashVec<String>,
@@ -31,7 +31,7 @@ impl Default for ScriptInfoContext {
     fn default() -> Self {
         Self {
             trigger_by_event: None,
-            trigger_by_process_id: None,
+            trigger_by_process_definition_key: None,
             trigger_by_element_type: None,
             trigger_by_element_id: None,
             script_type: Default::default(),
@@ -132,8 +132,8 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
             scr_inf.context.trigger_by_event = Some (HashVec::new(h));
         }
 
-        if let Some (h) = ev_indv.get_literals("bpmn:triggerByProcessId") {
-            scr_inf.context.trigger_by_process_id = Some (HashVec::new(h));
+        if let Some (h) = ev_indv.get_literals("bpmn:triggerByProcessDefinitionKey") {
+            scr_inf.context.trigger_by_process_definition_key = Some (HashVec::new(h));
         }
 
         if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementType") {

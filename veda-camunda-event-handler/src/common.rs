@@ -67,7 +67,7 @@ pub fn check_filters(script: &ScriptInfo<ScriptInfoContext>, qel: &QueueElement)
             return false;
         }
     }
-    if let Some(h) = &script.context.trigger_by_process_id {
+    if let Some(h) = &script.context.trigger_by_process_definition_key {
         if !h.hash.contains(&qel.process_definition_key) {
             return false;
         }
