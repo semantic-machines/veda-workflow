@@ -50,9 +50,9 @@ if (object && property && typeof value !== 'undefined') {
 
 # ------------------------------------------------------------
 
-bpmn:SetRightsHandler
+bpmn:SetRightHandler
   rdf:type bpmn:ExternalTaskHandler ;
-  rdfs:label "Обработчик топика 'setRights'" ;
+  rdfs:label "Обработчик топика 'setRight'" ;
   bpmn:triggerByTopic "setRight" ;
   bpmn:script """
 /* Available variables:
