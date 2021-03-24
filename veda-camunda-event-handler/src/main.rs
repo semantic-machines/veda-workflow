@@ -23,7 +23,7 @@ use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 
-const REST_TIMEOUT: time::Duration = time::Duration::from_millis(1000);
+const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-USER-TASK");
