@@ -9,25 +9,21 @@ use crate::common::{check_filters, execute_js};
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use serde_json::json;
-use std::{str, thread, time};
-use v_camunda_common::scripts::{load_task_scripts, Context};
+use std::{str, thread};
+use v_camunda_common::scripts::{get_camunda_event_queue, load_task_scripts, Context, REST_TIMEOUT};
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::common::load_onto;
 use v_module::module::{init_log, Module, PrepareError};
 use v_module::remote_indv_r_storage::*;
 use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::individual::RawObj;
-use v_module::v_onto::onto::Onto;
 use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 
-const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);
-
 fn main() -> Result<(), i32> {
-    init_log("CAMUNDA-USER-TASK");
+    init_log("CAMUNDA-EVENT-HANDLER");
     thread::spawn(move || inproc_storage_manager());
 
     let mut js_runtime = JsRuntime::new();
@@ -44,17 +40,6 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         error!("failed to get system ticket");
         return Ok(());
     }
-
-    let mut onto = Onto::default();
-
-    info!("load onto start");
-    load_onto(&mut backend.storage, &mut onto);
-    info!("load onto end");
-
-    //wait_load_ontology();
-    let mut queue_consumer = Consumer::new("./camunda/queue/camunda-events", "camunda_user_task", "camunda-event").expect("!!!!!!!!! FAIL QUEUE");
-
-    //let configuration = Configuration::default();
 
     if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = Context {
@@ -105,7 +90,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         );
 
         module.listen_queue_raw(
-            &mut queue_consumer,
+            &mut get_camunda_event_queue(),
             &mut ctx,
             &mut (before_batch as fn(&mut Backend, &mut Context<'a>, batch_size: u32) -> Option<u32>),
             &mut (prepare as fn(&mut Backend, &mut Context<'a>, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),

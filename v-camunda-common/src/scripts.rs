@@ -1,6 +1,7 @@
 use camunda_client::apis::client::APIClient;
 use serde_json::Value as JSONValue;
 use std::sync::Mutex;
+use std::time;
 use v8::json::stringify;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::PrepareError;
@@ -8,6 +9,7 @@ use v_module::v_api::app::ResultCode;
 use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::individual::Individual;
 use v_module::v_search::common::FTQuery;
+use v_queue::consumer::Consumer;
 use v_v8::callback::*;
 use v_v8::common::v8obj_into_individual;
 use v_v8::common::HashVec;
@@ -18,13 +20,19 @@ use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 use v_v8::session_cache::{commit, Transaction};
 
+pub const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);
+
+pub fn get_camunda_event_queue() -> Consumer {
+    Consumer::new("./camunda/queue/camunda-events", "camunda_user_task", "camunda-event").expect("!!!!!!!!! FAIL QUEUE")
+}
+
 pub struct ScriptInfoContext {
     pub trigger_by_event: Option<HashVec<String>>,
     pub trigger_by_process_definition_key: Option<HashVec<String>>,
     pub trigger_by_element_type: Option<HashVec<String>>,
     pub trigger_by_element_id: Option<HashVec<String>>,
     pub script_type: HashVec<String>,
-    pub fetch_event_data: bool
+    pub fetch_event_data: bool,
 }
 
 impl Default for ScriptInfoContext {
@@ -35,7 +43,7 @@ impl Default for ScriptInfoContext {
             trigger_by_element_type: None,
             trigger_by_element_id: None,
             script_type: Default::default(),
-            fetch_event_data: false
+            fetch_event_data: false,
         }
     }
 }
@@ -93,7 +101,7 @@ fn define_variables(js_vars: &[(&str, &str)]) -> String {
         } else if *var_type == "object" {
             out_str.push_str(&format!("var {} = ((tmp) => tmp ? JSON.parse(tmp) : tmp)(get_env_str_var('${}'));", var_name, var_name));
         } else {
-            error! ("unknown variable type {} for {}", var_name, var_type);
+            error!("unknown variable type {} for {}", var_name, var_type);
         }
     }
     out_str
@@ -128,23 +136,23 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(&id, &str_script);
 
-        if let Some (h) = ev_indv.get_literals("bpmn:triggerByEvent") {
-            scr_inf.context.trigger_by_event = Some (HashVec::new(h));
+        if let Some(h) = ev_indv.get_literals("bpmn:triggerByEvent") {
+            scr_inf.context.trigger_by_event = Some(HashVec::new(h));
         }
 
-        if let Some (h) = ev_indv.get_literals("bpmn:triggerByProcessDefinitionKey") {
-            scr_inf.context.trigger_by_process_definition_key = Some (HashVec::new(h));
+        if let Some(h) = ev_indv.get_literals("bpmn:triggerByProcessDefinitionKey") {
+            scr_inf.context.trigger_by_process_definition_key = Some(HashVec::new(h));
         }
 
-        if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementType") {
-            scr_inf.context.trigger_by_element_type = Some (HashVec::new(h));
+        if let Some(h) = ev_indv.get_literals("bpmn:triggerByElementType") {
+            scr_inf.context.trigger_by_element_type = Some(HashVec::new(h));
         }
 
-        if let Some (h) = ev_indv.get_literals("bpmn:triggerByElementId") {
-            scr_inf.context.trigger_by_element_id = Some (HashVec::new(h));
+        if let Some(h) = ev_indv.get_literals("bpmn:triggerByElementId") {
+            scr_inf.context.trigger_by_element_id = Some(HashVec::new(h));
         }
 
-        if let Some (h) = ev_indv.get_first_bool("bpmn:fetchEventData") {
+        if let Some(h) = ev_indv.get_first_bool("bpmn:fetchEventData") {
             scr_inf.context.fetch_event_data = h;
         }
 

@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate scan_fmt;
 
 use crate::common::out_value_2_complete_external_task;
 use crate::v8_script::execute_external_js_task;
@@ -7,15 +9,17 @@ use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
 use camunda_client::models::{FetchExternalTaskTopicDto, FetchExternalTasksDto};
 use serde_json::Value as JSONValue;
+use std::str;
 use std::{thread, time};
-use v_camunda_common::scripts::{load_task_scripts, Context, OutValue};
+use v_camunda_common::scripts::{get_camunda_event_queue, load_task_scripts, Context, OutValue, REST_TIMEOUT};
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::common::*;
+use v_module::module::PrepareError;
 use v_module::module::{get_info_of_module, init_log, wait_load_ontology, wait_module, Module};
 use v_module::remote_indv_r_storage::inproc_storage_manager;
 use v_module::v_api::APIClient as VedaClient;
-use v_module::v_onto::onto::Onto;
+use v_module::v_onto::individual::RawObj;
 use v_module::veda_backend::*;
+use v_queue::consumer::Consumer;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 
@@ -24,13 +28,18 @@ mod v8_script;
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-EXTERNAL-TASK");
+    thread::spawn(move || inproc_storage_manager());
 
+    let mut js_runtime = JsRuntime::new();
+    listen_queue(&mut js_runtime)
+}
+
+fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
     if get_info_of_module("fulltext_indexer").unwrap_or((0, 0)).0 == 0 {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    thread::spawn(move || inproc_storage_manager());
-
+    let mut module = Module::default();
     let mut backend = Backend::default();
 
     while !backend.api.connect() {
@@ -45,18 +54,9 @@ fn main() -> Result<(), i32> {
         return Err(-1);
     }
 
-    let mut onto = Onto::default();
-
-    info!("load onto start");
-    load_onto(&mut backend.storage, &mut onto);
-    info!("load onto end");
-
-    let mut js_runtime = JsRuntime::new();
-
     if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = Context {
             workplace: ScriptsWorkPlace::new(js_runtime.v8_isolate()),
-            //onto,
             sys_ticket,
             xr,
             camunda_client: APIClient::new(Configuration::default()),
@@ -67,9 +67,62 @@ fn main() -> Result<(), i32> {
 
         load_task_scripts(&mut ctx.workplace, &mut ctx.xr, "bpmn:ExternalTaskHandler", &[("ticket", "string"), ("task", "object")]);
 
-        let worker_id = "camunda-external-task";
+        module.listen_queue_raw(
+            &mut get_camunda_event_queue(),
+            &mut ctx,
+            &mut (before_batch as fn(&mut Backend, &mut Context<'a>, batch_size: u32) -> Option<u32>),
+            &mut (prepare as fn(&mut Backend, &mut Context<'a>, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Backend, &mut Context<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut Context<'a>) -> Result<(), PrepareError>),
+            &mut backend,
+        );
+    }
+    Ok(())
+}
 
-        loop {
+fn heartbeat<'a>(_module: &mut Backend, _ctx: &mut Context<'a>) -> Result<(), PrepareError> {
+    Ok(())
+}
+
+fn before_batch<'a>(_module: &mut Backend, _ctx: &mut Context<'a>, _size_batch: u32) -> Option<u32> {
+    None
+}
+
+fn after_batch<'a>(_module: &mut Backend, _ctx: &mut Context<'a>, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(false)
+}
+
+fn prepare<'a>(module: &mut Backend, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+    match prepare_and_err(module, ctx, queue_element, _my_consumer) {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            error!("prepare err={:?}", e);
+            Err(PrepareError::Recoverable)
+        }
+    }
+}
+
+fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+    if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
+        if let (
+            Some(event_type),
+            Some(_event),
+            Some(_id),
+            Some(_process_instance_id),
+            Some(_super_process_instance_id),
+            Some(_business_key),
+            Some(_process_definition_key),
+            Some(element_type),
+            Some(_element_id),
+        ) = scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String, String)
+        {
+            if !(event_type == "ExecutionEvent" && element_type == "serviceTask") {
+                return Ok(true);
+            }
+            let worker_id = "camunda-external-task";
+
+            thread::sleep(REST_TIMEOUT);
+
             match ctx.camunda_client.external_task_api().get_external_tasks(
                 None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
             ) {
@@ -86,7 +139,7 @@ fn main() -> Result<(), i32> {
                                     let execution_id = i_task.id.as_deref().unwrap_or_default();
                                     let topic_id = i_task.topic_name.as_deref().unwrap_or_default();
                                     let mut res = OutValue::Json(JSONValue::default());
-                                    if let Ok(is_executed) = execute_external_js_task(i_task, topic_id, &mut ctx, &mut res) {
+                                    if let Ok(is_executed) = execute_external_js_task(i_task, topic_id, ctx, &mut res) {
                                         if is_executed {
                                             let out_data = out_value_2_complete_external_task(worker_id, res);
                                             if let Err(e) = ctx.camunda_client.external_task_api().complete_external_task_resource(&execution_id, Some(out_data)) {
@@ -107,9 +160,7 @@ fn main() -> Result<(), i32> {
                 }
                 Err(e) => error!("get_external_tasks, error={:?}", e),
             }
-            thread::sleep(time::Duration::from_millis(300));
         }
     }
-
-    Ok(())
+    Ok(true)
 }

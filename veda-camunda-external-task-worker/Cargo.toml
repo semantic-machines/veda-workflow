@@ -10,6 +10,9 @@ lazy_static = "1.4.0"
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = "1.0"
 serde_json = "1.0"
+scan_fmt = "0.2.6"
+
+v_queue = "0.1.7"
 
 v_module = { package = "v-common-module", version = "0.1.31" }
 v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.32" }
