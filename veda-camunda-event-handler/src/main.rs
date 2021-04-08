@@ -18,6 +18,7 @@ use v_module::remote_indv_r_storage::*;
 use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::individual::RawObj;
 use v_module::v_onto::onto::Onto;
+use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
@@ -35,8 +36,9 @@ fn main() -> Result<(), i32> {
 
 fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
     let mut module = Module::default();
+    let mut backend = Backend::default();
     let sys_ticket;
-    if let Ok(t) = module.get_sys_ticket_id() {
+    if let Ok(t) = backend.get_sys_ticket_id() {
         sys_ticket = t;
     } else {
         error!("failed to get system ticket");
@@ -46,7 +48,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
     let mut onto = Onto::default();
 
     info!("load onto start");
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
     info!("load onto end");
 
     //wait_load_ontology();
@@ -54,7 +56,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
 
     //let configuration = Configuration::default();
 
-    if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = Context {
             workplace: ScriptsWorkPlace::new(js_runtime.v8_isolate()),
             //onto,
@@ -105,28 +107,29 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         module.listen_queue_raw(
             &mut queue_consumer,
             &mut ctx,
-            &mut (before_batch as fn(&mut Module, &mut Context<'a>, batch_size: u32) -> Option<u32>),
-            &mut (prepare as fn(&mut Module, &mut Context<'a>, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut Context<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut Context<'a>) -> Result<(), PrepareError>),
+            &mut (before_batch as fn(&mut Backend, &mut Context<'a>, batch_size: u32) -> Option<u32>),
+            &mut (prepare as fn(&mut Backend, &mut Context<'a>, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Backend, &mut Context<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut Context<'a>) -> Result<(), PrepareError>),
+            &mut backend,
         );
     }
     Ok(())
 }
 
-fn heartbeat<'a>(_module: &mut Module, _ctx: &mut Context<'a>) -> Result<(), PrepareError> {
+fn heartbeat<'a>(_module: &mut Backend, _ctx: &mut Context<'a>) -> Result<(), PrepareError> {
     Ok(())
 }
 
-fn before_batch<'a>(_module: &mut Module, _ctx: &mut Context<'a>, _size_batch: u32) -> Option<u32> {
+fn before_batch<'a>(_module: &mut Backend, _ctx: &mut Context<'a>, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch<'a>(_module: &mut Module, _ctx: &mut Context<'a>, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn after_batch<'a>(_module: &mut Backend, _ctx: &mut Context<'a>, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok(false)
 }
 
-fn prepare<'a>(module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare<'a>(module: &mut Backend, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     match prepare_and_err(module, ctx, queue_element, _my_consumer) {
         Ok(r) => Ok(r),
         Err(e) => {
@@ -149,10 +152,19 @@ pub struct QueueElement {
     element_id: String,
 }
 
-fn prepare_and_err<'a>(_module: &mut Module, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
-        if let (Some(event_type), Some(event), Some(id), Some(process_instance_id),Some(super_process_instance_id), Some(business_key), Some(process_definition_key), Some(element_type), Some(element_id)) =
-            scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String, String)
+        if let (
+            Some(event_type),
+            Some(event),
+            Some(id),
+            Some(process_instance_id),
+            Some(super_process_instance_id),
+            Some(business_key),
+            Some(process_definition_key),
+            Some(element_type),
+            Some(element_id),
+        ) = scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String, String)
         {
             let qel = if event_type == "UserTaskEvent" {
                 QueueElement {

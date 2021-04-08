@@ -1,11 +1,11 @@
 use std::error::Error;
 use std::fmt;
-use v_module::module::Module;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
+use v_module::veda_backend::*;
 
 #[derive(Debug)]
 pub struct MyError(pub String);
@@ -38,7 +38,7 @@ pub fn add_right(subj_uri: &str, obj_uri: &str, ctx: &mut Context, module: &mut 
 }
 */
 
-pub fn get_individual(module: &mut Module, uri: &str) -> Result<Individual, Box<dyn Error>> {
+pub fn get_individual(module: &mut Backend, uri: &str) -> Result<Individual, Box<dyn Error>> {
     let mut indv = Individual::default();
     if uri.is_empty() || !module.storage.get_individual(uri, &mut indv) {
         return Err(Box::new(MyError(format!("individual {} not found", uri))));
@@ -58,7 +58,7 @@ pub(crate) fn is_content_type(rdf_types: &[String], check_type: &str, onto: &mut
     false
 }
 
-pub fn set_err(module: &mut Module, sys_ticket: &str, indv: &mut Individual, err_text: &str) {
+pub fn set_err(module: &mut Backend, sys_ticket: &str, indv: &mut Individual, err_text: &str) {
     indv.parse_all();
     indv.set_string("v-s:errorMessage", err_text, Lang::RU);
     indv.set_uri("v-s:lastEditor", CVI_USER_NAME);

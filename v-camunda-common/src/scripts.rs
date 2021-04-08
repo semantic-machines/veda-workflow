@@ -72,11 +72,11 @@ impl Drop for SetupGuard {
 }
 
 pub fn load_task_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut XapianReader, task_type: &str, js_vars: &[(&str, &str)]) {
-    let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", &format!("'rdf:type' === '{}'", task_type)), &mut wp.module.storage);
+    let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", &format!("'rdf:type' === '{}'", task_type)), &mut wp.backend.storage);
 
     if res.result_code == ResultCode::Ok && res.count > 0 {
         for id in &res.result {
-            if let Some(ev_indv) = wp.module.get_individual(id, &mut Individual::default()) {
+            if let Some(ev_indv) = wp.backend.get_individual(id, &mut Individual::default()) {
                 prepare_script(wp, ev_indv, js_vars);
             }
         }

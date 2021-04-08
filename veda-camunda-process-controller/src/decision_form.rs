@@ -4,11 +4,11 @@ use camunda_client::models::{CompleteTaskDto, VariableValueDto};
 use serde_json::json;
 use std::collections::HashMap;
 use std::error::Error;
-use v_module::module::Module;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::individual::Individual;
+use v_module::veda_backend::*;
 
-pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, module: &mut Module, _signal: &str) -> Result<(), Box<dyn Error>> {
+pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, module: &mut Backend, _signal: &str) -> Result<(), Box<dyn Error>> {
     if let Some(decision_id) = decision_form.get_first_literal("v-wf:takenDecision") {
         if let Some(task_id) = decision_form.get_first_literal("bpmn:taskId") {
             let mut vars = HashMap::new();

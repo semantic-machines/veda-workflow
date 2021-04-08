@@ -15,6 +15,7 @@ use v_module::module::{get_info_of_module, init_log, wait_load_ontology, wait_mo
 use v_module::remote_indv_r_storage::inproc_storage_manager;
 use v_module::v_api::APIClient as VedaClient;
 use v_module::v_onto::onto::Onto;
+use v_module::veda_backend::*;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 
@@ -30,14 +31,14 @@ fn main() -> Result<(), i32> {
 
     thread::spawn(move || inproc_storage_manager());
 
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
-    while !module.api.connect() {
+    while !backend.api.connect() {
         error!("main module not ready, sleep and repeat");
         thread::sleep(time::Duration::from_millis(1000));
     }
     let sys_ticket;
-    if let Ok(t) = module.get_sys_ticket_id() {
+    if let Ok(t) = backend.get_sys_ticket_id() {
         sys_ticket = t;
     } else {
         error!("fail get sys_ticket");
@@ -47,12 +48,12 @@ fn main() -> Result<(), i32> {
     let mut onto = Onto::default();
 
     info!("load onto start");
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
     info!("load onto end");
 
     let mut js_runtime = JsRuntime::new();
 
-    if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = Context {
             workplace: ScriptsWorkPlace::new(js_runtime.v8_isolate()),
             //onto,

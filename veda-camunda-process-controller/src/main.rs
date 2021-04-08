@@ -13,6 +13,7 @@ use v_module::info::ModuleInfo;
 use v_module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
+use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 
 mod common;
@@ -37,9 +38,10 @@ fn main() -> Result<(), i32> {
 }
 
 fn listen_queue() -> Result<(), i32> {
+    let mut backend = Backend::default();
     let mut module = Module::default();
     let systicket;
-    if let Ok(t) = module.get_sys_ticket_id() {
+    if let Ok(t) = backend.get_sys_ticket_id() {
         systicket = t;
     } else {
         error!("fail get systicket");
@@ -49,7 +51,7 @@ fn listen_queue() -> Result<(), i32> {
     let mut onto = Onto::default();
 
     info!("load onto start");
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
     info!("load onto end");
 
     let module_info = ModuleInfo::new("./data", "camunda-connector", true);
@@ -73,27 +75,28 @@ fn listen_queue() -> Result<(), i32> {
     module.listen_queue(
         &mut queue_consumer,
         &mut ctx,
-        &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
+        &mut (before_batch as fn(&mut Backend, &mut Context, batch_size: u32) -> Option<u32>),
+        &mut (prepare as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+        &mut backend,
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
 }
 
-fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
+fn before_batch(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn after_batch(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok(false)
 }
 
-fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare(module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     match prepare_and_err(module, ctx, queue_element, _my_consumer) {
         Ok(r) => Ok(r),
         Err(e) => {
@@ -103,7 +106,7 @@ fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individua
     }
 }
 
-fn prepare_and_err(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, Box<dyn Error>> {
+fn prepare_and_err(module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, Box<dyn Error>> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("cmd is none");

@@ -8,6 +8,6 @@ edition = "2018"
 log = "0.4"
 serde_json = "1.0"
 uuid = { version = "0.8", features = ["serde", "v4"] }
-v_queue = "0.1"
-v_module = { package = "v-common-module", version = "0.1.26" }
+v_queue = "0.1.7"
+v_module = { package = "v-common-module", version = "0.1.31" }
 camunda_client = { path = "../camunda-client" }
