@@ -90,7 +90,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         );
 
         module.listen_queue_raw(
-            &mut get_camunda_event_queue(),
+            &mut get_camunda_event_queue("camunda-event-handler"),
             &mut ctx,
             &mut (before_batch as fn(&mut Backend, &mut Context<'a>, batch_size: u32) -> Option<u32>),
             &mut (prepare as fn(&mut Backend, &mut Context<'a>, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),

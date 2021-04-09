@@ -22,8 +22,8 @@ use v_v8::session_cache::{commit, Transaction};
 
 pub const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);
 
-pub fn get_camunda_event_queue() -> Consumer {
-    Consumer::new("./camunda/queue/camunda-events", "camunda_user_task", "camunda-event").expect("!!!!!!!!! FAIL QUEUE")
+pub fn get_camunda_event_queue(consumer_name: &str) -> Consumer {
+    Consumer::new("./camunda/queue/camunda-events", consumer_name, "camunda-event").expect("!!!!!!!!! FAIL QUEUE")
 }
 
 pub struct ScriptInfoContext {
