@@ -19,14 +19,44 @@
 
 # ------------------------------------------------------------
 
+bpmn:ProcessDefinition
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Определение процесса"@ru ;
+  rdfs:label "Process definition"@en ;
+.
+
+bpmn:processDefinitionKey
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Ключ определения процесса"@ru ;
+  rdfs:label "Process definition key"@en ;
+  rdfs:domain bpmn:ProcessDefinition ;
+  rdfs:domain bpmn:ProcessInstance ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:domain v-s:JournalRecord ;
+  rdfs:range xsd:string ;
+.
+
+# ------------------------------------------------------------
+
 bpmn:processInstanceId
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Id экземпляра процесса"@ru ;
   rdfs:label "Process instance Id"@en ;
   rdfs:domain bpmn:DecisionForm ;
   rdfs:domain bpmn:StartForm ;
+  rdfs:domain bpmn:ProcessInstance ;
   rdfs:domain bpmn:ProcessInstanceRequest ;
   rdfs:range xsd:string ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:ProcessInstance
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Экземпляр процесса"@ru ;
+  rdfs:label "Process instance"@en ;
 .
 
 # ------------------------------------------------------------
@@ -38,20 +68,12 @@ bpmn:StartForm
   rdfs:label "Start form"@en ;
 .
 
-bpmn:processDefinitionKey
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Ключ определения процесса"@ru ;
-  rdfs:label "Process definition key"@en ;
-  rdfs:domain bpmn:StartForm ;
-  rdfs:domain v-s:JournalRecord ;
-  rdfs:range xsd:string ;
-.
-
-bpmn:processInstanceId
-  rdf:type owl:DatatypeProperty ;
+bpmn:hasProcessInstance
+  rdf:type owl:ObjectProperty ;
   rdfs:label "Запустить процесс"@ru ;
   rdfs:label "Start process"@en ;
   rdfs:domain bpmn:StartForm ;
+  rdfs:range bpmn:ProcessInstance ;
 .
 
 bpmn:hasStatus
