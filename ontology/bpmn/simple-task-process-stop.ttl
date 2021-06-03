@@ -11,7 +11,7 @@
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
 @prefix td: <http://semantic-machines.com/veda/test-data/> .
 
-<http://semantic-machines.com/veda/simple-task-process>
+<http://semantic-machines.com/veda/simple-task-process-stop>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda"@ru ;
   rdfs:label "Veda system ontology"@en ;
@@ -21,23 +21,7 @@
 
 # ------------------------------------------------------------
 
-td:simple-task-process-start-form1
-  rdf:type bpmn:StartForm ;
-  bpmn:processDefinitionKey "SimpleTaskProcess" ;
-  bpmn:hasStatus bpmn:ToBeStarted ;
-  v-s:creator td:RomanKarpov-Analyst1 ;
-  v-s:responsible td:RomanKarpov-Analyst1 ;
-  v-s:controller td:RomanKarpov-Analyst1 ;
-  v-s:dateTo "2021-03-17T09:41:00Z"^^xsd:dateTime ;
-  v-wf:onDocument td:TestDocument ;
-  rdfs:label "Исполнить поручение" ;
-  v-s:description "Прошу исполнить поручение!" ;
-  v-ui:hasTemplate "v-ui_ttl.html";
-.
-
-td:TestDocument
-  rdf:type rdfs:Resource, v-s:Journaling ;
-  rdfs:label "Тестовый документ" ;
-  rdfs:comment "Тестовый комментарий" ;
-  v-ui:hasTemplate "v-ui_ttl.html";
+td:simple-task-process-stop-form1
+  rdf:type bpmn:ProcessInstanceStopRequest ;
+  bpmn:processInstanceId "bdda4f33-88d3-11eb-8acb-52540035343f" ;
 .

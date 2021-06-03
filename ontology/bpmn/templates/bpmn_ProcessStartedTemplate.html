@@ -1,0 +1,23 @@
+<div class="journal-record">
+  <hr class="margin-sm">
+  <div class="row">
+    <div class="col-md-2 col-sm-3 event-type">
+      <strong about="@" rel="rdf:type" data-template="v-ui_LabelTemplate.html"></strong>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc">
+      <div about="@" property="bpmn:processDefinitionKey"></div>
+      <span about="@" rel="bpmn:hasStartForm">
+        <span>
+          <span about="bpmn:StartForm" data-template="v-ui_LabelTemplate.html"></span>:
+          <span about="@" data-template="v-ui_LabelLinkTemplate.html"></span>,
+          <span about="v-s:creator" data-template="v-ui_LabelTemplate.html"></span>:
+          <span about="@" rel="v-s:creator" data-template="v-ui_LabelTemplate.html"></span>
+        </span>
+      </span>
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+  <div class="sub-journal" rel="v-s:childRecord"></div>
+</div>

@@ -91,7 +91,7 @@ bpmn:DecisionForm
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Форма решения"@ru ;
   rdfs:label "Decision form"@en ;
-  v-ui:hasTemplate s-wf:UserTaskFormTemplate;
+  v-ui:hasTemplate "s-wf_UserTaskFormTemplate.html";
 .
 
 bpmn:taskId
