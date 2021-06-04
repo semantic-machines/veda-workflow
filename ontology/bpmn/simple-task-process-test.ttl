@@ -32,12 +32,12 @@ td:simple-task-process-start-form1
   v-wf:onDocument td:TestDocument ;
   rdfs:label "Исполнить поручение" ;
   v-s:description "Прошу исполнить поручение!" ;
-  v-ui:hasTemplate "v-ui_ttl.html";
+  v-ui:hasTemplate v-ui:ttl;
 .
 
 td:TestDocument
   rdf:type rdfs:Resource, v-s:Journaling ;
   rdfs:label "Тестовый документ" ;
   rdfs:comment "Тестовый комментарий" ;
-  v-ui:hasTemplate "v-ui_ttl.html";
+  v-ui:hasTemplate v-ui:ttl;
 .
