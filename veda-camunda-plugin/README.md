@@ -17,8 +17,9 @@ Add the following plugin registration:
     ...
     <plugins>
     ...
+      <!-- plugin enabling Veda integration -->
       <plugin>
-        <class>com.semanticmachines.veda.bpm.VedaParseListenerPlugin</class>
+        <class>com.semanticmachines.veda.bpm.VedaCamundaPlugin</class>
       </plugin>
     ...
     </plugins>
