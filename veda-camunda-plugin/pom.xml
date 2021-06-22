@@ -4,7 +4,7 @@
   <artifactId>veda-camunda-plugin</artifactId>
   <version>0.0.1</version>
   <name>Veda Camunda Plugin</name>
-  <description>Plugin to sync process definitions, user tasks and processes with Veda platform</description>
+  <description>Plugin to integrate process definitions, user/external tasks and executions with Veda platform</description>
 
   <properties>
     <version.camunda>7.14.0</version.camunda>
