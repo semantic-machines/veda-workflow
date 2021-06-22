@@ -1,8 +1,6 @@
 package com.semanticmachines.veda.bpm;
 
 import java.util.List;
-import java.util.logging.Logger;
-
 import org.camunda.bpm.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
@@ -20,9 +18,6 @@ import org.camunda.bpm.engine.impl.variable.VariableDeclaration;
  */
 public class VedaParseListener extends AbstractBpmnParseListener {
 
-  private static VedaQueueWriter queueWriter = VedaQueueWriter.getInstance();
-  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
-  
   @Override
   public void parseUserTask(Element userTaskElement, ScopeImpl scope, ActivityImpl activity) {
     ActivityBehavior activityBehavior = activity.getActivityBehavior();
@@ -44,9 +39,6 @@ public class VedaParseListener extends AbstractBpmnParseListener {
   public void parseProcess(Element processElement, ProcessDefinitionEntity processDefinition) {
     processDefinition.addListener("start", VedaExecutionListener.getInstance());
     processDefinition.addListener("end", VedaExecutionListener.getInstance());
-    String msg = "ProcessDefinitionEvent:" + String.join(",", "deploy", processDefinition.getKey());
-    queueWriter.queue.push(msg);
-    LOGGER.info("queue: " + msg);
   }
 
   @Override
