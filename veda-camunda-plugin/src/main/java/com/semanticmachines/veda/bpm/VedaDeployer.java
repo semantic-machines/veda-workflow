@@ -7,7 +7,7 @@ import org.camunda.bpm.engine.impl.persistence.deploy.Deployer;
 import org.camunda.bpm.engine.impl.persistence.entity.DeploymentEntity;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 
-public class VedaDeployListener implements Deployer {
+public class VedaDeployer implements Deployer {
 
   private static VedaQueueWriter queueWriter = VedaQueueWriter.getInstance();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());

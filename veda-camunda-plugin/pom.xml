@@ -3,8 +3,8 @@
   <groupId>com.semanticmachines.veda.bpm</groupId>
   <artifactId>veda-camunda-plugin</artifactId>
   <version>0.0.1</version>
-  <name>Veda Camunda Parse Listener Plugin</name>
-  <description>Parse listener plugin for Camunda BPM user tasks and processes to sync them with Veda</description>
+  <name>Veda Camunda Plugin</name>
+  <description>Plugin to sync process definitions, user tasks and processes with Veda platform</description>
 
   <properties>
     <version.camunda>7.14.0</version.camunda>

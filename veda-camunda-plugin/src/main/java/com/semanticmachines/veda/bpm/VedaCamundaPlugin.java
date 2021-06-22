@@ -13,7 +13,7 @@ import java.util.List;
  * <p>{@link ProcessEnginePlugin} enabling the assignee informing parse listener.</p>
  *
  */
-public class VedaParseListenerPlugin extends AbstractProcessEnginePlugin {
+public class VedaCamundaPlugin extends AbstractProcessEnginePlugin {
 
   @Override
   public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
@@ -26,13 +26,13 @@ public class VedaParseListenerPlugin extends AbstractProcessEnginePlugin {
     }
     preParseListeners.add(new VedaParseListener());
 
-    // Add custom deploy listener
+    // Add custom deployer
     List<Deployer> postDeployListeners = processEngineConfiguration.getCustomPostDeployers();
     if(postDeployListeners == null) {
       postDeployListeners = new ArrayList<Deployer>();
       processEngineConfiguration.setCustomPostDeployers(postDeployListeners);
     }
-    postDeployListeners.add(new VedaDeployListener());
+    postDeployListeners.add(new VedaDeployer());
   }
 
 }
