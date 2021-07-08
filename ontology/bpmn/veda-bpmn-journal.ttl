@@ -145,6 +145,7 @@ bpmn:TaskCreatedTemplate
             </span>
             <i about="@" property="rdfs:comment"></i>
             <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></div>
+            <small about="@" property="v-s:created"></small>
           </div>
         </div>
       </div>
