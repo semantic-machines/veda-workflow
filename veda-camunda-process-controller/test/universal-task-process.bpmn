@@ -40,7 +40,7 @@
         <camunda:in source="label" target="label" />
         <camunda:in source="description" target="description" />
         <camunda:out source="takenDecision" target="takenDecision" />
-        <camunda:in sourceExpression="${ &#39;v-wf:DecisionRedirect, v-wf:DecisionAchieved&#39; }" target="possibleDecisionClass" />
+        <camunda:in sourceExpression="${ &#39;v-wf:DecisionAchieved, v-wf:DecisionRedirect&#39; }" target="possibleDecisionClass" />
         <camunda:in businessKey="#{execution.processBusinessKey}" />
         <camunda:inputOutput>
           <camunda:outputParameter name="takenDecisionClass">${ takenDecision.jsonPath("$.rdf:type[0].data").stringValue() }</camunda:outputParameter>

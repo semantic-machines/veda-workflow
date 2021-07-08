@@ -1,0 +1,108 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+<http://semantic-machines.com/veda/simple-task-process>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:SimpleTaskProcessDefinition
+  rdf:type bpmn:ProcessDefinition ;
+  bpmn:processDefinitionKey "SimpleTaskProcess" ;
+  bpmn:hasStartFormClass bpmn:SimpleTaskStartForm ;
+  rdfs:label "Исполнить поручение"@ru;
+  rdfs:label "Perform instruction"@en;
+.
+
+bpmn:UniversalTaskProcessDefinition
+  rdf:type bpmn:ProcessDefinition ;
+  bpmn:processDefinitionKey "UniversalTaskProcess" ;
+  rdfs:label "Процесс универсального поручения"@ru;
+  rdfs:label "Universal task process"@en;
+.
+
+bpmn:ElementalTaskProcessDefinition
+  rdf:type bpmn:ProcessDefinition ;
+  bpmn:processDefinitionKey "ElementalTaskProcess" ;
+  rdfs:label "Процесс элементарного поручения"@ru;
+  rdfs:label "Elemental task process"@en;
+.
+
+# ------------------------------------------------------------
+
+bpmn:SimpleTaskStartForm
+  rdf:type owl:Class ;
+  rdfs:subClassOf bpmn:StartForm ;
+  rdfs:label "Исполнить поручение"@ru ;
+  rdfs:label "Perform instruction"@en ;
+  v-ui:hasTemplate bpmn:SimpleTaskStartFormTemplate ;
+.
+
+# ------------------------------------------------------------
+
+bpmn:SimpleTaskStartFormTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовой формы 'Исполнить поручение'"@ru ;
+  rdfs:label "Template for 'Perform instruction' start form"@en ;
+  v-ui:template """
+<div class="container sheet">
+  <h3 about="@" property="rdfs:label"></h3>
+  <div class="row">
+    <div class="col-md-6">
+      <em about="v-s:responsible" property="rdfs:label"></em>
+      <div rel="v-s:responsible" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
+      <veda-control rel="v-s:responsible" data-type="link" class="-view edit search fulltext"></veda-control>
+    </div>
+    <div class="col-md-6">
+      <em about="v-s:dateTo" property="rdfs:label"></em>
+      <div property="v-s:dateTo" class="view -edit -search"></div>
+      <veda-control property="v-s:dateTo" data-type="dateTime" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <em about="v-s:description" property="rdfs:label"></em>
+  <div property="v-s:description" class="view -edit -search"></div>
+  <veda-control property="v-s:description" rows="3" data-type="text" class="-view edit search"></veda-control>
+  <em about="v-s:controller" property="rdfs:label"></em>
+  <div rel="v-s:controller" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+  <veda-control rel="v-s:controller" data-type="link" class="-view edit search fulltext"></veda-control>
+  <br>
+  <div class="actions -view edit -search">
+    <button id="send" class="btn btn-warning" about="v-s:Send" property="rdfs:label"></button>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="cancel"></span>
+  </div>
+</div>
+<script>
+  $("#send", template).click(function() {
+    template.trigger("save");
+  });
+
+  individual["rdfs:label"] = individual["rdf:type"][0]["rdfs:label"];
+  if ( mode === "edit" && individual.isNew() ) {
+    individual["v-s:controller"] = [ veda.appointment ? veda.appointment : veda.user ];
+  }
+
+  function closeModal () {
+    var modal = template.closest(".modal");
+    if (modal.length) {
+      modal.modal("hide");
+    }
+  }
+  individual.one("afterSave afterReset", closeModal);
+  template.one("remove", function () {
+    individual.off("afterSave", closeModal);
+    individual.off("afterReset", closeModal);
+  });
+</script>
+  """ ;
+.

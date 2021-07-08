@@ -7,11 +7,9 @@
 @prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
 @prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
 
-@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
-@prefix d: <http://semantic-machines.com/veda/veda-data/> .
 @prefix td: <http://semantic-machines.com/veda/test-data/> .
 
-<http://semantic-machines.com/veda/simple-task-process>
+<http://semantic-machines.com/veda/simple-task-process-test>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda"@ru ;
   rdfs:label "Veda system ontology"@en ;
@@ -22,18 +20,20 @@
 # ------------------------------------------------------------
 
 td:simple-task-process-start-form1
-  rdf:type bpmn:StartForm ;
+  rdf:type bpmn:SimpleTaskStartForm ;
   bpmn:processDefinitionKey "SimpleTaskProcess" ;
   bpmn:hasStatus bpmn:ToBeStarted ;
   v-s:creator td:RomanKarpov-Analyst1 ;
   v-s:responsible td:RomanKarpov-Analyst1 ;
   v-s:controller td:RomanKarpov-Analyst1 ;
   v-s:dateTo "2021-03-17T09:41:00Z"^^xsd:dateTime ;
-  v-wf:onDocument td:TestDocument ;
+  bpmn:hasDocument td:TestDocument ;
   rdfs:label "Исполнить поручение" ;
-  v-s:description "Прошу исполнить поручение!" ;
+  v-s:description "Прошу исполнить поручение!!!" ;
   v-ui:hasTemplate v-ui:ttl;
 .
+
+# ------------------------------------------------------------
 
 td:TestDocument
   rdf:type rdfs:Resource, v-s:Journaling ;

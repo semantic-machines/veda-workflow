@@ -19,14 +19,6 @@
 
 # --------------------------------------------------------
 
-bpmn:hasStartForm
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Статус"@ru ;
-  rdfs:label "Status"@en ;
-  rdfs:domain v-s:JournalRecord ;
-  rdfs:range bpmn:StartForm ;
-.
-
 bpmn:hasDecisionForm
   rdf:type owl:ObjectProperty ;
   rdfs:label "Задача"@ru ;

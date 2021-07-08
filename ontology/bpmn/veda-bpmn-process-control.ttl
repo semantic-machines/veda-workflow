@@ -37,7 +37,33 @@ bpmn:processDefinitionKey
   rdfs:range xsd:string ;
 .
 
+bpmn:processDefinitionId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Id определения процесса"@ru ;
+  rdfs:label "Process definition Id"@en ;
+  rdfs:domain bpmn:ProcessDefinition ;
+  rdfs:domain bpmn:ProcessInstance ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:domain v-s:JournalRecord ;
+  rdfs:range xsd:string ;
+.
+
+bpmn:hasStartFormClass
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Стартовая форма"@ru ;
+  rdfs:label "Start form"@en ;
+  rdfs:domain bpmn:ProcessDefinition ;
+  rdfs:range owl:Class ;
+.
+
 # ------------------------------------------------------------
+
+bpmn:ProcessInstance
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Экземпляр процесса"@ru ;
+  rdfs:label "Process instance"@en ;
+.
 
 bpmn:processInstanceId
   rdf:type owl:DatatypeProperty ;
@@ -50,13 +76,12 @@ bpmn:processInstanceId
   rdfs:range xsd:string ;
 .
 
-# ------------------------------------------------------------
-
-bpmn:ProcessInstance
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:UserThing ;
-  rdfs:label "Экземпляр процесса"@ru ;
-  rdfs:label "Process instance"@en ;
+bpmn:superProcessInstance
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Родительский экземпляр процесса"@ru ;
+  rdfs:label "Super process instance"@en ;
+  rdfs:domain bpmn:ProcessInstance ;
+  rdfs:range bpmn:ProcessInstance ;
 .
 
 # ------------------------------------------------------------
@@ -66,6 +91,15 @@ bpmn:StartForm
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Стартовая форма"@ru ;
   rdfs:label "Start form"@en ;
+.
+
+bpmn:hasStartForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Статус"@ru ;
+  rdfs:label "Status"@en ;
+  rdfs:domain bpmn:ProcessInstance ;
+  rdfs:domain v-s:JournalRecord ;
+  rdfs:range bpmn:StartForm ;
 .
 
 bpmn:hasProcessInstance
@@ -82,6 +116,14 @@ bpmn:hasStatus
   rdfs:label "Status"@en ;
   rdfs:domain bpmn:StartForm ;
   rdfs:range bpmn:Status ;
+.
+
+bpmn:hasDocument
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Документ"@ru ;
+  rdfs:label "Document"@en ;
+  rdfs:domain bpmn:StartForm ;
+  rdfs:range rdfs:Resource ;
 .
 
 # ------------------------------------------------------------
@@ -107,6 +149,7 @@ bpmn:businessKey
   rdfs:label "Ключ"@ru ;
   rdfs:label "Business key"@en ;
   rdfs:domain bpmn:DecisionForm ;
+  rdfs:domain bpmn:ProcessInstance ;
   rdfs:range rdfs:Resource ;
 .
 

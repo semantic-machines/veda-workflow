@@ -11,67 +11,12 @@
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
 @prefix td: <http://semantic-machines.com/veda/test-data/> .
 
-<http://semantic-machines.com/veda/simple-task-process-handlers>
+<http://semantic-machines.com/veda/common-user-task-handlers>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda"@ru ;
   rdfs:label "Veda system ontology"@en ;
 #  owl:versionInfo "1.3" ;
   v-s:loadPriority 6 ;
-.
-
-# ------------------------------------------------------------
-
-bpmn:SetPropertyHandler
-  rdf:type bpmn:ExternalTaskHandler ;
-  rdfs:label "Обработчик топика 'setProperty'" ;
-  bpmn:triggerByTopic "setProperty" ;
-  bpmn:script """
-/* Available variables:
- * ticket = superuser ticket
- * task = camunda task JSON
- */
-
-console.log('SET PROPERTY');
-
-const object = task.variables.object.value;
-const property = task.variables.property.value;
-const value = task.variables.value.value;
-
-console.log(object, property, value);
-
-if (object && property && typeof value !== 'undefined') {
-  const individual = new veda.IndividualModel(object);
-  individual.reset();
-  individual.set(property, value);
-  individual.save();
-}
-  """ ;
-.
-
-# ------------------------------------------------------------
-
-bpmn:SetRightHandler
-  rdf:type bpmn:ExternalTaskHandler ;
-  rdfs:label "Обработчик топика 'setRight'" ;
-  bpmn:triggerByTopic "setRight" ;
-  bpmn:script """
-/* Available variables:
- * ticket = superuser ticket
- * task = camunda task JSON
- */
-
-console.log('SET RIGHT');
-
-const subject = task.variables.subject.value;
-const object = task.variables.object.value;
-let right = task.variables.right.value;
-
-console.log(subject, object, right);
-
-if (subject && object && right.length) {
-  veda.BPMN.addRight(subject, object, right);
-}
-  """ ;
 .
 
 # ------------------------------------------------------------
@@ -190,92 +135,3 @@ veda.BPMN.addToGroup(task_created_record_id, task_deleted_record['@'], 'R');
   """ ;
 .
 
-# ------------------------------------------------------------
-
-bpmn:ProcessInstanceStartHandler
-  rdf:type bpmn:ExecutionHandler ;
-  rdfs:label "Обработчик события старта экземпляра процесса" ;
-  bpmn:triggerByEvent "end" ;
-#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
-  bpmn:triggerByElementType "startEvent";
-#  bpmn:triggerByElementId "startEvent";
-  bpmn:fetchEventData true ;
-  bpmn:script """
-/* Available variables:
- * ticket = superuser ticket
- * event = execution event
- * executionId = execution id
- * processInstanceId = process instance id
- * superProcessInstanceId = super process instance id
- * businessKey = process instance business key
- * processDefinitionKey = process definition id
- * elementType = execution element type
- * elementId = execution element id
- * execution = camunda execution object
- * variables = camunda execution variables object
- */
-
-console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
-
-if (variables && variables.startForm && superProcessInstanceId === 'null') {
-  const startForm = JSON.parse(variables.startForm.value);
-  if (veda.Util.hasValue(startForm, 'v-wf:onDocument')) {
-    const journal_uri = startForm['v-wf:onDocument'][0].data + 'j';
-    const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
-    const process_started_record = {
-      '@': process_started_record_id,
-      'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
-      'bpmn:hasStartForm': veda.Util.newUri(startForm['@']),
-      'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
-      'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
-    };
-    veda.BPMN.addToJournal(journal_uri, process_started_record);
-
-    // Add journal record to parent journal record group [R]
-    veda.BPMN.addToGroup(journal_uri, process_started_record['@'], 'R');
-  }
-}
-  """ ;
-.
-
-bpmn:ProcessInstanceEndHandler
-  rdf:type bpmn:ExecutionHandler ;
-  rdfs:label "Обработчик события завершения экземпляра процесса" ;
-  bpmn:triggerByEvent "end" ;
-#  bpmn:triggerByProcessDefinitionKey "SimpleTaskProcess" ;
-  bpmn:triggerByElementType "null", "endEvent";
-#  bpmn:triggerByElementId "null";
-  bpmn:fetchEventData false ;
-  bpmn:script """
-/* Available variables:
- * ticket = superuser ticket
- * event = execution event
- * executionId = execution id
- * processInstanceId = process instance id
- * superProcessInstanceId = super process instance id
- * businessKey = process instance business key
- * processDefinitionKey = process definition id
- * elementType = execution element type
- * elementId = execution element id
- * execution = camunda execution object
- * variables = camunda execution variables object
- */
-
-console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
-
-if (superProcessInstanceId === 'null') {
-  const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
-  const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('business key ended' + businessKey);
-  const process_ended_record = {
-    '@': process_ended_record_id,
-    'rdf:type': veda.Util.newUri('bpmn:ProcessEnded'),
-    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
-    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
-  };
-  veda.BPMN.addToJournal(process_started_record_id, process_ended_record);
-
-  // Add journal record to parent journal record group [R]
-  veda.BPMN.addToGroup(process_started_record_id, process_ended_record['@'], 'R');
-}
-  """ ;
-.
