@@ -63,6 +63,7 @@ bpmn:ProcessInstance
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Экземпляр процесса"@ru ;
   rdfs:label "Process instance"@en ;
+  v-ui:hasTemplate v-ui:ttl;
 .
 
 bpmn:processInstanceId
@@ -107,6 +108,7 @@ bpmn:hasProcessInstance
   rdfs:label "Запустить процесс"@ru ;
   rdfs:label "Start process"@en ;
   rdfs:domain bpmn:StartForm ;
+  rdfs:domain v-s:JournalRecord ;
   rdfs:range bpmn:ProcessInstance ;
 .
 
@@ -115,6 +117,7 @@ bpmn:hasStatus
   rdfs:label "Статус"@ru ;
   rdfs:label "Status"@en ;
   rdfs:domain bpmn:StartForm ;
+  rdfs:domain bpmn:ProcessInstance ;
   rdfs:range bpmn:Status ;
 .
 

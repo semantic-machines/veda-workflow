@@ -47,16 +47,44 @@ bpmn:ProcessInstanceStartHandler
 console.log('PROCESS INSTANCE STARTED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
 
 if (variables && variables.startForm && superProcessInstanceId === 'null') {
-  const startForm = JSON.parse(variables.startForm.value);
+  const startFormVariable = JSON.parse(variables.startForm.value);
+  const startForm_uri = startFormVariable['@'];
+  const startForm = get_individual(veda.ticket, startForm_uri);
+
+  // Create process instance individual
+  const processInstance_uri = 'd:' + processInstanceId;
+  const processInstance = {
+    '@': processInstance_uri,
+    'rdf:type': veda.Util.newUri('bpmn:ProcessInstance'),
+    'bpmn:hasStartForm': veda.Util.newUri(startForm_uri),
+    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
+    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
+    'bpmn:businessKey': veda.Util.newStr(businessKey),
+    'bpmn:hasStatus': veda.Util.newUri('bpmn:Started'),
+  };
+  put_individual(veda.ticket, processInstance);
+
+  // Link start form with process instance individual
+  startForm['bpmn:hasProcessInstance'] = veda.Util.newUri(processInstance_uri);
+  put_individual(veda.ticket, startForm);
+
+  // Add process instance to start form group [R]
+  veda.BPMN.addToGroup(startForm_uri, processInstance_uri, 'R');
+
   if (veda.Util.hasValue(startForm, 'bpmn:hasDocument')) {
-    const journal_uri = startForm['bpmn:hasDocument'][0].data + 'j';
+    const document_uri = startForm['bpmn:hasDocument'][0].data;
+
+    // Add start form to document group [R]
+    veda.BPMN.addToGroup(document_uri, startForm_uri, 'R');
+
+    // Create process started journal record
+    const journal_uri = document_uri + 'j';
     const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
     const process_started_record = {
       '@': process_started_record_id,
       'rdf:type': veda.Util.newUri('bpmn:ProcessStarted'),
-      'bpmn:hasStartForm': veda.Util.newUri(startForm['@']),
-      'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
-      'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
+      'bpmn:hasStartForm': veda.Util.newUri(startForm_uri),
+      'bpmn:hasProcessInstance': veda.Util.newUri(processInstance_uri),
     };
     veda.BPMN.addToJournal(journal_uri, process_started_record);
 
@@ -93,18 +121,25 @@ bpmn:ProcessInstanceEndHandler
 console.log('PROCESS INSTANCE ENDED', processDefinitionKey, processInstanceId, superProcessInstanceId, businessKey);
 
 if (superProcessInstanceId === 'null') {
+  const processInstance_uri = 'd:' + processInstanceId;
+
+  // Create process ended journal record
   const process_started_record_id = 'd:' + veda.Util.Sha256.hash('business key started' + businessKey);
   const process_ended_record_id = 'd:' + veda.Util.Sha256.hash('business key ended' + businessKey);
   const process_ended_record = {
     '@': process_ended_record_id,
     'rdf:type': veda.Util.newUri('bpmn:ProcessEnded'),
-    'bpmn:processDefinitionKey': veda.Util.newStr(processDefinitionKey),
-    'bpmn:processInstanceId': veda.Util.newStr(processInstanceId),
+    'bpmn:hasProcessInstance': veda.Util.newUri(processInstance_uri),
   };
   veda.BPMN.addToJournal(process_started_record_id, process_ended_record);
 
   // Add journal record to parent journal record group [R]
   veda.BPMN.addToGroup(process_started_record_id, process_ended_record['@'], 'R');
+
+  // Update status in process instance individual
+  const processInstance = get_individual(veda.ticket, processInstance_uri);
+  processInstance['bpmn:hasStatus'] = veda.Util.newUri('bpmn:Finished');
+  put_individual(veda.ticket, processInstance);
 }
   """ ;
 .

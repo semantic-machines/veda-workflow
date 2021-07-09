@@ -30,10 +30,19 @@ bpmn:ToBeStarted
   rdf:type bpmn:Status ;
   rdfs:label "Ожидает запуска"@ru ;
   rdfs:label "To be started"@en ;
+  v-s:tag "info" ;
 .
 
 bpmn:Started
   rdf:type bpmn:Status ;
   rdfs:label "Запущен"@ru ;
   rdfs:label "Started"@en ;
+  v-s:tag "success" ;
+.
+
+bpmn:Finished
+  rdf:type bpmn:Status ;
+  rdfs:label "Завершен"@ru ;
+  rdfs:label "Finished"@en ;
+  v-s:tag "default" ;
 .
