@@ -67,6 +67,7 @@ userTask['v-wf:possibleDecisionClass'] = variables.possibleDecisionClass.value.r
 userTask['v-s:creator'] = 'cfg:VedaSystem';
 userTask['v-wf:from'] = from;
 userTask['v-wf:to'] = to;
+userTask['v-wf:dateGiven'] = new Date(variables.dateTo.value);
 userTask['v-wf:isCompleted'] = false;
 userTask['v-wf:onDocument'] = variables.document.value;
 userTask.save();

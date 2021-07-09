@@ -54,6 +54,8 @@ try {
 tmp;</camunda:script>
           </camunda:outputParameter>
         </camunda:inputOutput>
+        <camunda:in source="dateTo" target="dateTo" />
+        <camunda:in source="controller" target="controller" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0663m9t</bpmn:incoming>
       <bpmn:incoming>Flow_0hi0jnp</bpmn:incoming>
@@ -105,6 +107,7 @@ try {
 tmp;</camunda:script>
           </camunda:outputParameter>
         </camunda:inputOutput>
+        <camunda:in source="dateTo" target="dateTo" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1joh4d9</bpmn:incoming>
       <bpmn:outgoing>Flow_0gx0wi9</bpmn:outgoing>

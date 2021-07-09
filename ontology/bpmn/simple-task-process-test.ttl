@@ -41,3 +41,10 @@ td:TestDocument
   rdfs:comment "Тестовый комментарий" ;
   v-ui:hasTemplate v-ui:ttl;
 .
+
+# -----------------------------------------------------------
+
+td:simple-task-process-stop-form1
+  rdf:type bpmn:ProcessInstanceStopRequest ;
+  bpmn:processInstanceId "4df715eb-e0ab-11eb-b6c9-52540035343f" ;
+.
