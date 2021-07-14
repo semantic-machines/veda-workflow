@@ -68,17 +68,29 @@ pub fn check_filters(script: &ScriptInfo<ScriptInfoContext>, qel: &QueueElement)
         }
     }
     if let Some(h) = &script.context.trigger_by_process_definition_key {
-        if !h.hash.contains(&qel.process_definition_key) {
+        if let Some(v) = &qel.process_definition_key {
+            if !h.hash.contains(v) {
+                return false;
+            }
+        } else {
             return false;
         }
     }
     if let Some(h) = &script.context.trigger_by_element_type {
-        if !h.hash.contains(&qel.element_type) {
+        if let Some(v) = &qel.element_type {
+            if !h.hash.contains(v) {
+                return false;
+            }
+        } else {
             return false;
         }
     }
     if let Some(h) = &script.context.trigger_by_element_id {
-        if !h.hash.contains(&qel.element_id) {
+        if let Some(v) = &qel.element_id {
+            if !h.hash.contains(v) {
+                return false;
+            }
+        } else {
             return false;
         }
     }

@@ -89,6 +89,13 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
             ],
         );
 
+        load_task_scripts(
+            &mut ctx.workplace,
+            &mut ctx.xr,
+            "bpmn:ProcessDefinitionHandler",
+            &[("event", "string"), ("processDefinitionKey", "string"), ("processDefinitionId", "string")],
+        );
+
         module.listen_queue_raw(
             &mut get_camunda_event_queue("camunda-event-handler"),
             &mut ctx,
@@ -128,105 +135,186 @@ pub struct QueueElement {
     rtype: String,
     event_type: String,
     event: String,
-    id: String,
-    process_instance_id: String,
-    super_process_instance_id: String,
-    business_key: String,
-    process_definition_key: String,
-    element_type: String,
-    element_id: String,
+    id: Option<String>,
+    process_instance_id: Option<String>,
+    super_process_instance_id: Option<String>,
+    business_key: Option<String>,
+    process_definition_key: Option<String>,
+    process_definition_id: Option<String>,
+    element_type: Option<String>,
+    element_id: Option<String>,
+}
+
+impl Default for QueueElement {
+    fn default() -> Self {
+        QueueElement {
+            rtype: "".to_string(),
+            event_type: "".to_string(),
+            event: "".to_string(),
+            id: None,
+            process_instance_id: None,
+            super_process_instance_id: None,
+            business_key: None,
+            process_definition_key: None,
+            process_definition_id: None,
+            element_type: None,
+            element_id: None,
+        }
+    }
+}
+
+fn parse_message(queue_element: &RawObj) -> Result<QueueElement, PrepareError> {
+    if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
+        if let (Some(event_type), Some(fields)) = scan_fmt_some!(el_str, "{}:{}", String, String) {
+            let qel = if event_type == "ProcessDefinitionEvent" {
+                if let (Some(event), Some(process_definition_key), Some(process_definition_id)) = scan_fmt_some!(&fields, "{},{},{}", String, String, String) {
+                    QueueElement {
+                        rtype: "bpmn:ProcessDefinitionHandler".to_owned(),
+                        event_type,
+                        event,
+                        id: None,
+                        process_instance_id: None,
+                        super_process_instance_id: None,
+                        business_key: None,
+                        process_definition_key: Some(process_definition_key),
+                        process_definition_id: Some(process_definition_id),
+                        element_type: None,
+                        element_id: None,
+                    }
+                } else {
+                    QueueElement::default()
+                }
+            } else {
+                if let (
+                    Some(event),
+                    Some(id),
+                    Some(process_instance_id),
+                    Some(super_process_instance_id),
+                    Some(business_key),
+                    Some(process_definition_key),
+                    Some(element_type),
+                    Some(element_id),
+                ) = scan_fmt_some!(&fields, "{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String)
+                {
+                    if event_type == "UserTaskEvent" {
+                        QueueElement {
+                            rtype: "bpmn:UserTaskHandler".to_owned(),
+                            event_type,
+                            event,
+                            id: Some(id),
+                            process_instance_id: Some(process_instance_id),
+                            super_process_instance_id: Some(super_process_instance_id),
+                            business_key: Some(business_key),
+                            process_definition_key: Some(process_definition_key),
+                            process_definition_id: None,
+                            element_type: Some(element_type),
+                            element_id: Some(element_id),
+                        }
+                    } else if event_type == "ExecutionEvent" {
+                        QueueElement {
+                            rtype: "bpmn:ExecutionHandler".to_owned(),
+                            event_type,
+                            event,
+                            id: Some(id),
+                            process_instance_id: Some(process_instance_id),
+                            super_process_instance_id: Some(super_process_instance_id),
+                            business_key: Some(business_key),
+                            process_definition_key: Some(process_definition_key),
+                            process_definition_id: None,
+                            element_type: Some(element_type),
+                            element_id: Some(element_id),
+                        }
+                    } else if event_type == "ProcessDefinitionEvent" {
+                        QueueElement {
+                            rtype: "bpmn:ProcessDefinitionHandler".to_owned(),
+                            event_type,
+                            event,
+                            id: Some(id),
+                            process_instance_id: Some(process_instance_id),
+                            super_process_instance_id: Some(super_process_instance_id),
+                            business_key: Some(business_key),
+                            process_definition_key: Some(process_definition_key),
+                            process_definition_id: None,
+                            element_type: Some(element_type),
+                            element_id: Some(element_id),
+                        }
+                    } else {
+                        QueueElement::default()
+                    }
+                } else {
+                    QueueElement::default()
+                }
+            };
+            return Ok(qel);
+        } else {
+            error!("failed to parse queue element, data={:?}", el_str);
+        }
+    } else {
+        error!("failed to parse queue element to utf8, data={:?}", queue_element.data);
+    }
+    Err(PrepareError::Fatal)
 }
 
 fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
-    if let Ok(el_str) = str::from_utf8(queue_element.data.as_slice()) {
-        if let (
-            Some(event_type),
-            Some(event),
-            Some(id),
-            Some(process_instance_id),
-            Some(super_process_instance_id),
-            Some(business_key),
-            Some(process_definition_key),
-            Some(element_type),
-            Some(element_id),
-        ) = scan_fmt_some!(el_str, "{}:{},{},{},{},{},{},{},{}", String, String, String, String, String, String, String, String, String)
-        {
-            let qel = if event_type == "UserTaskEvent" {
-                QueueElement {
-                    rtype: "bpmn:UserTaskHandler".to_owned(),
-                    event_type,
-                    event,
-                    id,
-                    process_instance_id,
-                    super_process_instance_id,
-                    business_key,
-                    process_definition_key,
-                    element_type,
-                    element_id,
-                }
-            } else if event_type == "ExecutionEvent" {
-                QueueElement {
-                    rtype: "bpmn:ExecutionHandler".to_owned(),
-                    event_type,
-                    event,
-                    id,
-                    process_instance_id,
-                    super_process_instance_id,
-                    business_key,
-                    process_definition_key,
-                    element_type,
-                    element_id,
-                }
-            } else {
-                QueueElement {
-                    rtype: "".to_string(),
-                    event_type: "".to_string(),
-                    event: "".to_string(),
-                    id: "".to_string(),
-                    process_instance_id: "".to_string(),
-                    super_process_instance_id: "".to_string(),
-                    business_key: "".to_string(),
-                    process_definition_key: "".to_string(),
-                    element_type: "".to_string(),
-                    element_id: "".to_string(),
-                }
-            };
+    if let Ok(qel) = parse_message(queue_element) {
+        let mut is_found_script = false;
+        let mut is_fetch_event_data = false;
 
-            let mut is_found_script = false;
-            let mut is_fetch_event_data = false;
-
-            for script_id in ctx.workplace.scripts_order.iter() {
-                if let Some(script) = ctx.workplace.scripts.get(script_id) {
-                    if check_filters(script, &qel) {
-                        if script.context.fetch_event_data {
-                            is_fetch_event_data = true;
-                        }
-                        is_found_script = true;
+        for script_id in ctx.workplace.scripts_order.iter() {
+            if let Some(script) = ctx.workplace.scripts.get(script_id) {
+                if check_filters(script, &qel) {
+                    if script.context.fetch_event_data {
+                        is_fetch_event_data = true;
                     }
+                    is_found_script = true;
                 }
             }
+        }
 
-            if !is_found_script {
-                return Ok(true);
-            }
+        if !is_found_script {
+            return Ok(true);
+        }
 
-            let mut session_data = CallbackSharedData::default();
-            session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
-            session_data.g_key2attr.insert("$processInstanceId".to_owned(), qel.process_instance_id.to_owned());
-            session_data.g_key2attr.insert("$superProcessInstanceId".to_owned(), qel.super_process_instance_id.to_owned());
-            session_data.g_key2attr.insert("$businessKey".to_owned(), qel.business_key.to_owned());
-            session_data.g_key2attr.insert("$processDefinitionKey".to_owned(), qel.process_definition_key.to_owned());
-            session_data.g_key2attr.insert("$event".to_owned(), qel.event.to_owned());
-            session_data.g_key2attr.insert("$elementType".to_owned(), qel.element_type.to_owned());
-            session_data.g_key2attr.insert("$elementId".to_owned(), qel.element_id.to_owned());
+        let mut session_data = CallbackSharedData::default();
+        session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
 
-            if qel.event_type == "UserTaskEvent" {
-                session_data.g_key2attr.insert("$taskId".to_owned(), qel.id.to_owned());
+        session_data.g_key2attr.insert("$event".to_owned(), qel.event.to_owned());
+
+        if let Some(v) = &qel.process_instance_id {
+            session_data.g_key2attr.insert("$processInstanceId".to_owned(), v.to_owned());
+        }
+
+        if let Some(v) = &qel.super_process_instance_id {
+            session_data.g_key2attr.insert("$superProcessInstanceId".to_owned(), v.to_owned());
+        }
+
+        if let Some(v) = &qel.business_key {
+            session_data.g_key2attr.insert("$businessKey".to_owned(), v.to_owned());
+        }
+
+        if let Some(v) = &qel.process_definition_key {
+            session_data.g_key2attr.insert("$processDefinitionKey".to_owned(), v.to_owned());
+        }
+
+        if let Some(v) = &qel.process_definition_id {
+            session_data.g_key2attr.insert("$processDefinitionId".to_owned(), v.to_owned());
+        }
+
+        if let Some(v) = &qel.element_type {
+            session_data.g_key2attr.insert("$elementType".to_owned(), v.to_owned());
+        }
+        if let Some(v) = &qel.element_id {
+            session_data.g_key2attr.insert("$elementId".to_owned(), v.to_owned());
+        }
+
+        if qel.event_type == "UserTaskEvent" {
+            if let Some(id) = &qel.id {
+                session_data.g_key2attr.insert("$taskId".to_owned(), id.to_owned());
 
                 if is_fetch_event_data {
                     thread::sleep(REST_TIMEOUT);
 
-                    match ctx.camunda_client.task_api().get_task(&qel.id) {
+                    match ctx.camunda_client.task_api().get_task(id) {
                         Ok(v) => {
                             session_data.g_key2attr.insert("$task".to_owned(), json!(v).to_string());
                         }
@@ -235,7 +323,7 @@ fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_eleme
                         }
                     }
 
-                    match ctx.camunda_client.task_api().get_variables(&qel.id, None, Some(false)) {
+                    match ctx.camunda_client.task_api().get_variables(id, None, Some(false)) {
                         Ok(v) => {
                             session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
                         }
@@ -244,13 +332,15 @@ fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_eleme
                         }
                     }
                 }
-            } else if qel.event_type == "ExecutionEvent" {
-                session_data.g_key2attr.insert("$executionId".to_owned(), qel.id.to_owned());
+            }
+        } else if qel.event_type == "ExecutionEvent" {
+            if let Some(id) = &qel.id {
+                session_data.g_key2attr.insert("$executionId".to_owned(), id.to_owned());
 
                 if is_fetch_event_data {
                     thread::sleep(REST_TIMEOUT);
 
-                    match ctx.camunda_client.execution_api().get_execution(&qel.id) {
+                    match ctx.camunda_client.execution_api().get_execution(id) {
                         Ok(p) => {
                             session_data.g_key2attr.insert("$execution".to_owned(), json!(p).to_string());
                         }
@@ -259,7 +349,7 @@ fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_eleme
                         }
                     }
 
-                    match ctx.camunda_client.execution_api().get_variables(&qel.id, None, Some(false)) {
+                    match ctx.camunda_client.execution_api().get_variables(id, None, Some(false)) {
                         Ok(v) => {
                             session_data.g_key2attr.insert("$variables".to_owned(), json!(v).to_string());
                         }
@@ -269,19 +359,14 @@ fn prepare_and_err<'a>(_module: &mut Backend, ctx: &mut Context<'a>, queue_eleme
                     }
                 }
             }
-
-            match execute_js(&qel, session_data, ctx) {
-                Ok(_) => {}
-                Err(e) => {
-                    return Err(e);
-                }
-            }
-        } else {
-            error!("failed to parse queue element, data={:?}", el_str);
-            return Ok(true);
         }
-    } else {
-        error!("failed to parse queue element to utf8, data={:?}", queue_element.data);
+
+        match execute_js(&qel, session_data, ctx) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
+        }
     }
 
     Ok(true)
