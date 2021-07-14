@@ -131,3 +131,10 @@ bpmn:ExternalTaskHandler
   rdfs:label "Обработчик внешней задачи"@ru ;
   rdfs:label "External task handler"@en ;
 .
+
+bpmn:ProcessDefinitionHandler
+  rdf:type owl:Class ;
+  rdfs:subClassOf bpmn:EventHandler ;
+  rdfs:label "Обработчик событий определения процесса"@ru ;
+  rdfs:label "Process definition event handler"@en ;
+.
