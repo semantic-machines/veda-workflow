@@ -1,11 +1,10 @@
 use crate::common::{set_err, CVI_USER_NAME};
 use crate::Context;
-use std::error::Error;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::individual::Individual;
-use v_module::veda_backend::*;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::individual::Individual;
+use v_common::v_api::api_client::{ApiError, IndvOp};
 
-pub fn prepare_stop_process(prepared_indv: &mut Individual, ctx: &mut Context, module: &mut Backend, _signal: &str) -> Result<(), Box<dyn Error>> {
+pub fn prepare_stop_process(prepared_indv: &mut Individual, ctx: &mut Context, module: &mut Backend, _signal: &str) -> Result<(), ApiError> {
     if let Some(process_instance_id) = prepared_indv.get_first_literal("bpmn:processInstanceId") {
         prepared_indv.parse_all();
         match ctx.camunda_client.process_instance_api().delete_process_instance(&process_instance_id, None, Some(true), Some(false), None) {

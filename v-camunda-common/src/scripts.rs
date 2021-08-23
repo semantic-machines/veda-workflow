@@ -3,12 +3,6 @@ use serde_json::Value as JSONValue;
 use std::sync::Mutex;
 use std::time;
 use v8::json::stringify;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::PrepareError;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::APIClient as VedaClient;
-use v_module::v_onto::individual::Individual;
-use v_module::v_search::common::FTQuery;
 use v_queue::consumer::Consumer;
 use v_v8::callback::*;
 use v_v8::common::v8obj_into_individual;
@@ -19,6 +13,12 @@ use v_v8::rusty_v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
 use v_v8::session_cache::{commit, Transaction};
+use v_v8::v_common::ft_xapian::xapian_reader::XapianReader;
+use v_v8::v_common::module::module::PrepareError;
+use v_v8::v_common::onto::individual::Individual;
+use v_v8::v_common::search::common::FTQuery;
+use v_v8::v_common::v_api::api_client::APIClient as VedaClient;
+use v_v8::v_common::v_api::obj::ResultCode;
 
 pub const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);
 

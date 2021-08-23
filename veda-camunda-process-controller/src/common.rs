@@ -1,11 +1,11 @@
 use std::error::Error;
 use std::fmt;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::Lang;
-use v_module::v_onto::individual::Individual;
-use v_module::v_onto::onto::Onto;
-use v_module::veda_backend::*;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::datatype::Lang;
+use v_common::onto::individual::Individual;
+use v_common::onto::onto::Onto;
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 
 #[derive(Debug)]
 pub struct MyError(pub String);

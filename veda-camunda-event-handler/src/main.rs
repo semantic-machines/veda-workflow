@@ -11,16 +11,16 @@ use camunda_client::apis::configuration::Configuration;
 use serde_json::json;
 use std::{str, thread};
 use v_camunda_common::scripts::{get_camunda_event_queue, load_task_scripts, Context, REST_TIMEOUT};
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{init_log, Module, PrepareError};
-use v_module::remote_indv_r_storage::*;
-use v_module::v_api::APIClient as VedaClient;
-use v_module::v_onto::individual::RawObj;
-use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 use v_v8::jsruntime::JsRuntime;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::CallbackSharedData;
+use v_v8::v_common::ft_xapian::xapian_reader::XapianReader;
+use v_v8::v_common::module::module::{init_log, Module, PrepareError};
+use v_v8::v_common::module::remote_indv_r_storage::inproc_storage_manager;
+use v_v8::v_common::module::veda_backend::Backend;
+use v_v8::v_common::onto::individual::RawObj;
+use v_v8::v_common::v_api::api_client::APIClient as VedaClient;
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-EVENT-HANDLER");

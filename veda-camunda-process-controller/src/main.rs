@@ -7,13 +7,13 @@ use crate::start_form::prepare_start_form;
 use crate::stop_process::prepare_stop_process;
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
-use std::error::Error;
-use v_module::common::load_onto;
-use v_module::info::ModuleInfo;
-use v_module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
-use v_module::v_onto::individual::Individual;
-use v_module::v_onto::onto::Onto;
-use v_module::veda_backend::*;
+use v_common::module::common::load_onto;
+use v_common::module::info::ModuleInfo;
+use v_common::module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
+use v_common::module::veda_backend::Backend;
+use v_common::onto::individual::Individual;
+use v_common::onto::onto::Onto;
+use v_common::v_api::api_client::ApiError;
 use v_queue::consumer::Consumer;
 
 mod common;
@@ -106,7 +106,7 @@ fn prepare(module: &mut Backend, ctx: &mut Context, queue_element: &mut Individu
     }
 }
 
-fn prepare_and_err(module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, Box<dyn Error>> {
+fn prepare_and_err(module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, ApiError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("cmd is none");

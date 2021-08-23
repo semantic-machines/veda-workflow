@@ -1,8 +1,8 @@
 use camunda_client::models::LockedExternalTaskDto;
 use serde_json::json;
 use v_camunda_common::scripts::{execute_js_and_return_data, Context, OutValue};
-use v_module::module::PrepareError;
 use v_v8::session_cache::CallbackSharedData;
+use v_v8::v_common::module::module::PrepareError;
 
 pub fn execute_external_js_task(task: &LockedExternalTaskDto, script_id: &str, ctx: &mut Context, out: &mut OutValue) -> Result<bool, PrepareError> {
     info!("topic:{} for task:{:?}, process:{:?}, process-instance:{:?}", script_id, task.id, task.process_definition_key, task.process_instance_id);

@@ -1,17 +1,15 @@
 use crate::common::{get_individual, set_err, CVI_USER_NAME};
 use crate::Context;
-use serde_json::json;
-
 use camunda_client::models::{StartProcessInstanceDto, VariableValueDto};
+use serde_json::json;
 use std::collections::HashMap;
-use std::error::Error;
 use uuid::Uuid;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::{DataType, Lang};
-use v_module::v_onto::individual::Individual;
-use v_module::veda_backend::*;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::datatype::{DataType, Lang};
+use v_common::onto::individual::Individual;
+use v_common::v_api::api_client::{ApiError, IndvOp};
 
-pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module: &mut Backend, _signal: &str) -> Result<(), Box<dyn Error>> {
+pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module: &mut Backend, _signal: &str) -> Result<(), ApiError> {
     if start_form.any_exists("bpmn:hasStatus", &["bpmn:ToBeStarted"]) {
         if let Some(process_id) = start_form.get_first_literal("bpmn:processDefinitionKey") {
             //let start_form_id = start_form.get_id().to_owned();
