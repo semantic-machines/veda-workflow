@@ -20,7 +20,7 @@ use v_v8::v_common::module::module::{init_log, Module, PrepareError};
 use v_v8::v_common::module::remote_indv_r_storage::inproc_storage_manager;
 use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::onto::individual::RawObj;
-use v_v8::v_common::v_api::api_client::APIClient as VedaClient;
+use v_v8::v_common::v_api::api_client::MStorageClient as VedaClient;
 
 fn main() -> Result<(), i32> {
     init_log("CAMUNDA-EVENT-HANDLER");

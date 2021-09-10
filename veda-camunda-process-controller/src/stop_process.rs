@@ -11,7 +11,7 @@ pub fn prepare_stop_process(prepared_indv: &mut Individual, ctx: &mut Context, m
             Ok(_) => {
                 prepared_indv.set_bool("v-wf:isCompleted", true);
                 prepared_indv.set_uri("v-s:lastEditor", CVI_USER_NAME);
-                module.api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &prepared_indv)?;
+                module.mstorage_api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &prepared_indv)?;
                 info!("stop_process: success send stop process instance, id={}", process_instance_id);
             }
             Err(e) => {

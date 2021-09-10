@@ -17,7 +17,7 @@ use v_v8::v_common::ft_xapian::xapian_reader::XapianReader;
 use v_v8::v_common::module::module::PrepareError;
 use v_v8::v_common::onto::individual::Individual;
 use v_v8::v_common::search::common::FTQuery;
-use v_v8::v_common::v_api::api_client::APIClient as VedaClient;
+use v_v8::v_common::v_api::api_client::MStorageClient as VedaClient;
 use v_v8::v_common::v_api::obj::ResultCode;
 
 pub const REST_TIMEOUT: time::Duration = time::Duration::from_millis(300);

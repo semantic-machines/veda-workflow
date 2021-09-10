@@ -26,7 +26,7 @@ pub fn prepare_decision_form(decision_form: &mut Individual, ctx: &mut Context, 
                         decision_form.parse_all();
                         decision_form.set_bool("v-wf:isCompleted", true);
                         decision_form.set_uri("v-s:lastEditor", CVI_USER_NAME);
-                        module.api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &decision_form)?;
+                        module.mstorage_api.update_or_err(&ctx.sys_ticket, "", "prepare-decision-process", IndvOp::Put, &decision_form)?;
                         info!("prepare_decision_form: success send task complete");
                     }
                     Err(e) => {

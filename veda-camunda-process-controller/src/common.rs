@@ -63,7 +63,7 @@ pub fn set_err(module: &mut Backend, sys_ticket: &str, indv: &mut Individual, er
     indv.set_string("v-s:errorMessage", err_text, Lang::RU);
     indv.set_uri("v-s:lastEditor", CVI_USER_NAME);
 
-    let res = module.api.update(sys_ticket, IndvOp::Put, indv);
+    let res = module.mstorage_api.update(sys_ticket, IndvOp::Put, indv);
     if res.result != ResultCode::Ok {
         error!("fail update, uri={}, result_code={:?}", indv.get_id(), res.result);
     } else {

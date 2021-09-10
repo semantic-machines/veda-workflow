@@ -51,7 +51,7 @@ pub fn prepare_start_form(start_form: &mut Individual, ctx: &mut Context, module
                     updated_start_form.set_uri("bpmn:hasStatus", "bpmn:Started");
                     updated_start_form.set_string("bpmn:processInstanceId", &res.id.unwrap_or_default(), Lang::NONE);
                     updated_start_form.set_uri("v-s:lastEditor", CVI_USER_NAME);
-                    module.api.update_or_err(&ctx.sys_ticket, "", "start-process", IndvOp::SetIn, &updated_start_form)?;
+                    module.mstorage_api.update_or_err(&ctx.sys_ticket, "", "start-process", IndvOp::SetIn, &updated_start_form)?;
                 }
                 Err(e) => {
                     error!("fail execute process instance, err={:?}", e);

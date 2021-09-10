@@ -20,7 +20,7 @@ use v_v8::v_common::module::module::{get_info_of_module, init_log, wait_load_ont
 use v_v8::v_common::module::remote_indv_r_storage::inproc_storage_manager;
 use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::onto::individual::RawObj;
-use v_v8::v_common::v_api::api_client::APIClient as VedaClient;
+use v_v8::v_common::v_api::api_client::MStorageClient as VedaClient;
 
 mod common;
 mod v8_script;
@@ -41,7 +41,7 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
     let mut module = Module::default();
     let mut backend = Backend::default();
 
-    while !backend.api.connect() {
+    while !backend.mstorage_api.connect() {
         error!("main module not ready, sleep and repeat");
         thread::sleep(time::Duration::from_millis(1000));
     }
