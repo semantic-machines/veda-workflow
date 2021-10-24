@@ -12,6 +12,6 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 v_queue = "=0.1.9"
 
 #v_common = { package = "v-common",  path = "../../v-common" }
-v_common = { package = "v-common", version = "=0.1.65" }
+v_common = { package = "v-common", version = "=0.1.90" }
 
 camunda_client = { path = "../camunda-client" }

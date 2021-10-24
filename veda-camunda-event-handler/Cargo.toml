@@ -17,7 +17,7 @@ scan_fmt = "0.2.6"
 v_queue = "=0.1.9"
 
 #v_v8 = { package = "v-common-v8", path = "../../v-common-v8" }
-v_v8 = { package = "v-common-v8", version = "=0.1.72" }
+v_v8 = { package = "v-common-v8", version = "=0.1.81" }
 
 camunda_client = { path = "../camunda-client" }
 v_camunda_common = { path = "../v-camunda-common" }
