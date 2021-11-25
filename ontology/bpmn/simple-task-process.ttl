@@ -84,7 +84,7 @@ bpmn:SimpleTaskStartFormTemplate
 </div>
 <script>
   $("#send", template).click(function() {
-    template.trigger("save");
+    template[0].dispatchEvent(new Event("save"));
   });
 
   individual["rdfs:label"] = individual["rdf:type"][0]["rdfs:label"];
