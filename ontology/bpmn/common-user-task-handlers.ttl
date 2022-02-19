@@ -114,13 +114,11 @@ bpmn:TaskDeletionHandler
 
 console.log('REMOVE TASK');
 const queryString = `'rdf:type'==='bpmn:DecisionForm' && 'bpmn:taskId'=='\\\\"${taskId}\\\\"'`;
-veda.Backend.query(veda.ticket, queryString).then(queryResult => {
-  const tasks = queryResult.result;
-  tasks.forEach(task => {
-    veda.Backend.remove_individual(veda.ticket, task)
-      .then(() => console.log(`Task removed: task = ${task}, process = ${processInstanceId}`))
-      .catch(error => console.log(`Error removing task: ${task}, process = ${processInstanceId}`, error.stack));
-  });
+const queryResult = query(veda.ticket, queryString);
+const tasks = queryResult.result;
+tasks.forEach(task => {
+  remove_individual(veda.ticket, task);
+  console.log(`Task removed: task = ${task}, process = ${processInstanceId}`)
 });
 
 const task_created_record_id = 'd:' + veda.Util.Sha256.hash('task created' + taskId);
@@ -132,7 +130,5 @@ veda.BPMN.addToJournal(task_created_record_id, task_deleted_record);
 
 // Add journal record to parent journal record group [R]
 veda.BPMN.addToGroup(task_created_record_id, task_deleted_record['@'], 'R');
-
   """ ;
 .
-
