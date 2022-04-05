@@ -34,20 +34,28 @@ public class VedaQueueWriter {
     System.out.println("Writing default queue properties");
     queue_path = "./data/queue/camunda-events";
     properties.setProperty("queue_path", queue_path);
+    FileOutputStream fos = null;
     try {
-      properties.store(new FileOutputStream("camunda-veda-plugin.properties"), null);
+      fos = new FileOutputStream("camunda-veda-plugin.properties");
+      properties.store(fos, null);
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      if (fos != null) fos.close();
     }
   }
   
   private static void loadProperties() {
+	FileInputStream fis = null;
     try {
-      properties.load(new FileInputStream("camunda-veda-plugin.properties"));
+      fis = new FileInputStream("camunda-veda-plugin.properties");
+      properties.load(fis);
       queue_path = properties.getProperty("queue_path", "");
       System.out.println(properties);
     } catch (IOException e) {
       writeDefaultProperties();
+    } finally {
+    	if (fis != null) fis.close();
     }
   }
   
