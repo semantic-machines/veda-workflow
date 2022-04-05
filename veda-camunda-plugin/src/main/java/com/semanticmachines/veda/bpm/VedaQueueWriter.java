@@ -41,7 +41,11 @@ public class VedaQueueWriter {
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      if (fos != null) fos.close();
+      try {
+    	if (fos != null) fos.close();
+      } catch (IOException e) {
+    	e.printStackTrace();
+      }
     }
   }
   
@@ -55,7 +59,11 @@ public class VedaQueueWriter {
     } catch (IOException e) {
       writeDefaultProperties();
     } finally {
-    	if (fis != null) fis.close();
+	  try {
+		if (fis != null) fis.close();  
+	  } catch (IOException e) {
+		  e.printStackTrace();
+	  }
     }
   }
   
