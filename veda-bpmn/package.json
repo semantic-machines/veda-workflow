@@ -1,0 +1,37 @@
+{
+  "name": "veda-bpmn",
+  "version": "0.0.1",
+  "description": "veda bpmn engine module",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "npm t"
+  },
+  "keywords": [
+    "veda",
+    "bpmn",
+    "engine"
+  ],
+  "author": "Roman Karpov",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "baretest": "^2.0.0",
+    "eslint": "^7.15.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-security-node": "^1.1.0"
+  },
+  "dependencies": {
+    "bent": "^7.3.12",
+    "bpmn-engine": "^14.0.0",
+    "camunda-bpmn-moddle": "^6.1.2",
+    "loglevel": "^1.8.0",
+    "node-fetch": "^3.2.0",
+    "veda": "https://gitpkg.now.sh/semantic-machines/veda/source-web",
+    "veda-node-queue-consumer": "github:semantic-machines/veda-node-queue-consumer"
+  }
+}
